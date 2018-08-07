@@ -69,7 +69,7 @@ def print_board(board):
     print()
 
 
-def change_tile(tile_index, change, board):
+def change_tile(tile_loc, change, board):
     """
     Function for moving on board
     
@@ -78,8 +78,8 @@ def change_tile(tile_index, change, board):
         e.g. [1,3,"F"]
         Starts from 1, 1.
     """
-    board[tile_index[0]][tile_index[1]] = change
-    print("Play row", tile_index[0], "col", tile_index[1])
+    board[tile_loc[0]][tile_loc[1]] = change
+    print("Play row", tile_loc[0], "col", tile_loc[1])
     return board
 
 
@@ -129,7 +129,7 @@ from random import randint
 # HACK: Choose 4 random tiles not at the sides or corners.
 for i in range(4):
     tile_loc = [randint(2, row_count-1), randint(2, col_count-1)]
-    board = change_tile(tile_loc, "F", board)
+    board = change_tile(tile_loc, "8", board)
     print_board(board)
 
 #Get indexes for every numbered tile:
@@ -155,13 +155,15 @@ numbered_tiles = get_numbered_tiles(board)
 
 # Function for tiles around a tile
 def get_tiles_around_tile(tile_loc, board):
+    around_tile = []
 #   Shorten variables
     row = tile_loc[0]
     col = tile_loc[1]
     
     for i in range(-1, 2):
         for k in range(-1, 2):
-            around_tile.append([row+i, col+i, get_tile([row+i, col+k])])
+            if not (i== 0 and k== 0):
+                around_tile.append([row+i, col+k, get_tile([row+i, col+k], board)])
     
     return around_tile
 
@@ -206,10 +208,13 @@ for numbered_tile in numbered_tiles:
 #       flag those unknown tiles
     unknown_count = 0
     for tile in around_tile:
-        if tile == "?":
+        if tile[2] == "?":
             unknown_count += 1
+        elif tile[2] == "F":
+            number -= 1
         if unknown_count == number:
             board = apply_to_tiles_around_tile(tile_loc, "?", "F", board)
+            break
 
 
 """
