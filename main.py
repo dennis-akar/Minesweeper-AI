@@ -35,7 +35,7 @@ Process data into internal data representation
 Use Probability Theory to make wise choice
 
 """
-# %% Main Executor
+# Main Executor
 
 # Import own modules
 import representation as rep
@@ -50,9 +50,7 @@ board = rep.make_board(row_count, col_count)
 
 board = strat.change_random_tiles(row_count, col_count, board)
 
-numbered_tiles = strat.get_numbered_tiles(board)
-
-board = strat.unknowns_around_equal_to_number_tile(numbered_tiles, board)
+board = strat.unknowns_around_equal_to_number_tile(board)
 
 rep.print_board(board)
 

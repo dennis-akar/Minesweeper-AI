@@ -43,12 +43,12 @@ def get_tiles_around_tile(tile_loc, board):
 def change_random_tiles(row_count, col_count, board, amount=4, strategy="no_sides"):
     """
     HACK: Choose 4 random tiles not at the sides or corners.
-    HACK: Just replace with 8
+    HACK: Currently only replacing with 8
     """
     for i in range(amount):
         if strategy == "no_sides":
             tile_loc = [randint(2, row_count-1), randint(2, col_count-1)]
-            board = rep.change_tile(tile_loc, "8", board)
+            board = rep.change_tile(tile_loc, "7", board)
             rep.print_board(board)  
     return board
 
@@ -73,8 +73,10 @@ def change_tiles_around_tile(tile_loc, condition, change, board):
 
 # STRATEGY Functions
 
-def unknowns_around_equal_to_number_tile(numbered_tiles, board):
+def unknowns_around_equal_to_number_tile(board):
     #For every numbered tile:
+    numbered_tiles = get_numbered_tiles(board)
+    
     for numbered_tile in numbered_tiles:
     #   Check all nearby tiles
         tile_loc = numbered_tile[:2]
@@ -89,9 +91,8 @@ def unknowns_around_equal_to_number_tile(numbered_tiles, board):
                 unknown_count += 1
             elif tile[2] == "F":
                 number -= 1
-            if unknown_count == number:
-                board = change_tiles_around_tile(tile_loc, "?", "F", board)
-                break
+        if unknown_count == number:
+            board = change_tiles_around_tile(tile_loc, "?", "F", board)
     return board
 
 
@@ -99,7 +100,7 @@ def unknowns_around_equal_to_number_tile(numbered_tiles, board):
 If we cannot find a trivial next tile, we will be using Probability Theory.
 
 In the event that no trivial tile can be flagged or opened, we have two methods: 
-for nearby unknown tiles and for remaining non-nearby unknown tiles.
+for nearby unknown tiles and for remaining not-nearby unknown tiles.
 
 Nearby method is to go through every numbered tile, count number of empty tiles
 around it, and divide the number of the numbered tile by the number of empty tiles. 
@@ -110,15 +111,15 @@ numbered tile. As individual unknown tiles get different probability values
 from more than one numbered tile, an average (?perhaps a better way is available?) 
 is taken for that unknown tile. The tile with the least probability is chosen.
 
-Non-nearby method is to assess the probability that any non-nearby unknown 
+Not-nearby method is to assess the probability that any not-nearby unknown 
 tile has a bomb. This is done by calculating the minimum number of possible 
-bombs nearby (worst case scenario if choosing non-nearby unknown tile) and 
+bombs nearby (worst case scenario if choosing not-nearby unknown tile) and 
 substracting that from the number of non-flagged tiles. We divide our resulting
-number by the quantity of non-nearby numbers. This gives us the probability that
-one of the non-nearby tiles is a bomb.
+number by the quantity of not-nearby numbers. This gives us the probability that
+one of the not-nearby tiles is a bomb.
 
-We then compare the lowest probability nearby tile with the non-nearby tiles'
+We then compare the lowest probability nearby tile with the not-nearby tiles'
 probability.
 If individual tile, choose that.
-If non-nearby or equal, choose random tile which is not near walls.
+If not-nearby or equal, choose random tile which is not near walls.
 """
