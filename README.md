@@ -5,8 +5,8 @@ If we cannot find a trivial next tile, we will be using Probability Theory.
 In the event that no trivial tile can be flagged or opened, we have two methods: 
 for nearby unknown tiles and for remaining not-nearby unknown tiles.
 
-Nearby method is to go through every numbered tile, count number of empty tiles
-around it, and divide the number of the numbered tile by the number of empty tiles. 
+Nearby method is to go through every numbered tile, count number of unknown tiles
+around it, and divide the number of the numbered tile by the number of unknown tiles. 
 This gives us the probability that the unknown tiles will be a bomb.
 
 The found probability value is assigned to the unknown tiles nearby the 

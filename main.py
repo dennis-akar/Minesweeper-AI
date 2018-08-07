@@ -50,7 +50,9 @@ board = rep.make_board(row_count, col_count)
 
 board = strat.change_random_tiles(row_count, col_count, board)
 
-board = strat.unknowns_around_equal_to_number_tile(board)
+#board = strat.unknowns_around_equal_to_number_tile(board)
+
+board = strat.probability_nearby(board)
 
 rep.print_board(board)
 

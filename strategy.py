@@ -95,6 +95,46 @@ def unknowns_around_equal_to_number_tile(board):
             board = change_tiles_around_tile(tile_loc, "?", "F", board)
     return board
 
+def probability_nearby(board):
+    numbered_tiles = get_numbered_tiles(board)
+    
+    for numbered_tile in numbered_tiles:
+    #   Check all nearby tiles
+        tile_loc = numbered_tile[:2]
+        number = numbered_tile[2]
+        around_tile = get_tiles_around_tile(tile_loc, board)
+    
+    #   Go through every unknown tile and count them
+        unknown_count = 0
+        tile_already_probability = []
+        for tile in around_tile:
+            if tile[2][0] == "?":
+                unknown_count += 1
+                if len(tile[2]) > 1:
+                    tile_already_probability.append(tile)
+            elif tile[2] == "F":
+                number -= 1
+        # Get probability, assign to background info of tile
+        # (Make rep function to add info, but in print only give first lettter)
+        # [?-0.45] for example, second or third significant digit.
+        probability = number / unknown_count
+        for tile in around_tile:
+            if tile[2][0][0] == "?":
+                board = rep.change_tile(tile[:2], tile[2][:] + "-" + str(probability), board)
+        
+        for i in range(1, len(board)-2):
+            for k in range(1, len(board)-2):
+                temp_tile = rep.get_tile([i,k], board)
+                if temp_tile[:2] == "?-":
+                    prob_values = temp_tile.split("-")[1:]
+                    rep.change_tile([i,k], str(round(sum([float(x) for x in prob_values]) 
+                                                    / len(temp_tile[1:]), 3)), board)
+        
+        #board = change_tiles_around_tile(tile_loc, "?", "?-" + str(probability), board)
+        #for tile in tile_already_probability:
+            #board = change_tile(tile[:2], (tile[2][2:] + probability) / 2, board)
+    return board
+
 
 """
 If we cannot find a trivial next tile, we will be using Probability Theory.
@@ -102,8 +142,8 @@ If we cannot find a trivial next tile, we will be using Probability Theory.
 In the event that no trivial tile can be flagged or opened, we have two methods: 
 for nearby unknown tiles and for remaining not-nearby unknown tiles.
 
-Nearby method is to go through every numbered tile, count number of empty tiles
-around it, and divide the number of the numbered tile by the number of empty tiles. 
+Nearby method is to go through every numbered tile, count number of unknown tiles
+around it, and divide the number of the numbered tile by the number of unknown tiles. 
 This gives us the probability that the unknown tiles will be a bomb.
 
 The found probability value is assigned to the unknown tiles nearby the 
