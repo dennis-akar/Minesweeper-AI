@@ -7,54 +7,14 @@ Created on Wed Aug  8 00:09:14 2018
 """
 
 # Formalized Strategy
+"""
+STRATEGY Functions.
+Forms the possible strategies of the AI.
+"""
 import representation as rep
+import rules as rul
 from random import randint
 
-# GET Functions
-
-def get_numbered_tiles(board):
-    numbered_tiles = [] # [[tile_row, tile_col, number], ...]
-        
-    for row_index, row in enumerate(board):
-        for col_index, item in enumerate(row):
-            if item.isdigit():
-                numbered_tiles.append([row_index, col_index, int(item)])
-    return numbered_tiles
-
-
-def get_tiles_around_tile(tile_loc, board):
-    """
-    Returns [[row, col, tile_type], ...]
-    """
-    around_tile = []
-#   Shorten variables
-    row = tile_loc[0]
-    col = tile_loc[1]
-    
-    for i in range(-1, 2):
-        for k in range(-1, 2):
-            if not (i== 0 and k== 0):
-                around_tile.append([row+i, col+k, rep.get_tile([row+i, col+k], board)])
-    
-    return around_tile
-
-# CHANGE Functions
-
-def change_random_tiles(row_count, col_count, board, amount=4, replace="8", strategy="no_sides"):
-    """
-    HACK: Choose 4 random tiles not at the sides or corners.
-    HACK: Currently only replacing with 8
-    """
-    for i in range(amount):
-        if strategy == "no_sides":
-            tile_loc = [randint(2, row_count-1), randint(2, col_count-1)]
-            board = rep.change_tile(tile_loc, replace, board)
-            rep.print_board(board)
-        else:
-            tile_loc = [randint(1, row_count), randint(1, col_count)]
-            board = rep.change_tile(tile_loc, replace, board)
-            rep.print_board(board)
-    return board
 
 #Get indexes for every numbered tile:
 
@@ -67,7 +27,7 @@ def change_random_tiles(row_count, col_count, board, amount=4, replace="8", stra
 
 
 def change_tiles_around_tile(tile_loc, condition, change, board, condition_type = None):
-    around_tile = get_tiles_around_tile(tile_loc, board)
+    around_tile = rep.get_tiles_around_tile(tile_loc, board)
     
     for tile_info in around_tile:
         if tile_info[2][:len(condition)] == condition and condition_type == "starting_with":
@@ -75,6 +35,27 @@ def change_tiles_around_tile(tile_loc, condition, change, board, condition_type 
         elif tile_info[2] == condition:
             board = rep.change_tile(tile_info[:2], change, board)
     
+    return board
+
+def change_to_average_probability(board):
+    # Scan through every tile. If[2][0] first two letters "?-", split by "-",
+    # sum list and divide by len, round to 3
+    for i in range(1, len(board)-1):
+        for k in range(1, len(board[0])-1):
+            temp_tile = rep.get_tile([i,k], board)
+            if temp_tile[:2] == "?-":
+                prob_values = temp_tile.split("-")[1:]
+                total_probability = round(sum([float(x) for x in prob_values]) 
+                                                / len(prob_values), 3)
+                if total_probability > 1.0:
+                    print("Probability of tile", i, k, "not possible.")
+                    rep.print_board(board)
+                    raise Exception
+                total_probability = str(total_probability)
+                while len(total_probability) < 5:
+                    total_probability += "0"
+
+                board = rul.change_tile([i,k], "?-" + total_probability, board)
     return board
 
 # STRATEGY Functions
@@ -85,13 +66,13 @@ def probability_nearby(board):
     and if not equal, calculate probability
     """
     #For every numbered tile:
-    numbered_tiles = get_numbered_tiles(board)
+    numbered_tiles = rep.get_numbered_tiles(board)
     
     for numbered_tile in numbered_tiles:
     #   Check all nearby tiles
         tile_loc = numbered_tile[:2]
         number = numbered_tile[2]
-        around_tile = get_tiles_around_tile(tile_loc, board)
+        around_tile = rep.get_tiles_around_tile(tile_loc, board)
     
     #   Go through every unknown tile and count them
         unknown_count = 0
@@ -112,23 +93,10 @@ def probability_nearby(board):
             probability = round(number / unknown_count, 3)
             for tile in around_tile:
                 if tile[2][0][0] == "?":
-                    board = rep.change_tile(tile[:2], tile[2][:] + "-" + str(probability), board)
+                    board = rul.change_tile(tile[:2], tile[2][:] + "-" + str(probability), board)
         
-        # Scan through every tile. If[2][0] first two letters "?-", split by "-",
-        # sum list and divide by len, round to 3
-        for i in range(1, len(board)-1):
-            for k in range(1, len(board[0])-1):
-                temp_tile = rep.get_tile([i,k], board)
-                if temp_tile[:2] == "?-":
-                    prob_values = temp_tile.split("-")[1:]
-                    total_probability = round(sum([float(x) for x in prob_values]) 
-                                                    / len(prob_values), 3)
-                    if total_probability > 1.0:
-                        print("Probability of tile", i, k, "not possible.")
-                        rep.print_board(board)
-                        raise Exception
-                    
-                    rep.change_tile([i,k], "?-" + str(total_probability), board)
+        board = change_to_average_probability(board)
+
     return board
 
 
@@ -137,23 +105,39 @@ def probability_not_nearby(total_bomb_count, board):
     """
     remaining_bomb_count = total_bomb_count
     not_nearby_tiles = []
+    # For every non-border tile, calculate remaining bomb count and check if
+    # not nearby. If not-nearby, add to list.
     for i in range(1, len(board)-1):
         for k in range(1, len(board[0])-1):
             tile = rep.get_tile([i,k], board)
             
+            # If flagged, substract from remaining bomb count
             if tile == "F":
                 remaining_bomb_count -= 1
+            
+            # If unknown, check if not-nearby.
             elif tile[0] == "?":
-                around_tile = get_tiles_around_tile([i,k], board)
-                #[s for s in mylist if s.isdigit()]
+                around_tile = rep.get_tiles_around_tile([i,k], board)
+                # Check if surrounding tiles are not string type integers,
+                # as that means it is not-nearby.
                 if len([temp_tile[2] for temp_tile in around_tile if temp_tile[2].isdigit()]) == 0:
                     not_nearby_tiles.append([i,k, tile])
+            
+            # HACK If number tile, substract 1 from remaining bomb count.
+            # TODO: Find nearby number tiles, substract by combination possible
+            # which would minimize nearby bomb count.
+            elif tile.isdigit():
+                remaining_bomb_count -= 1
                 
+    # Calculate probability
     probability = round(remaining_bomb_count / len(not_nearby_tiles), 3)
     
+    # Add necessary information
     for tile in not_nearby_tiles:
-        board = rep.change_tile(tile[:2], tile[2] + "-" + str(probability), board)
-        
+        board = rul.change_tile(tile[:2], tile[2] + "-" + str(probability), board)
+    
+    board = change_to_average_probability(board)
+    
     return board
 
 

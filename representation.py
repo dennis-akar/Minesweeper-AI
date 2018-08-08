@@ -10,6 +10,10 @@ Created on Wed Aug  8 00:08:29 2018
 """
 
 # Internal Representation of Game
+"""
+GET Functions.
+Provides access of data from board.
+"""
 
 def make_board(row_count=8, col_count=8):
     # Board constants
@@ -38,7 +42,7 @@ def print_board(board):
             tile = get_tile([i,k], board)
             print(tile, end='')
             if len(tile) == 1:
-                print("--.---", end='')
+                print("------", end='')
             print(" ", end='')
         print()
 #    for row in board:
@@ -49,27 +53,35 @@ def print_board(board):
 def get_tile(tile_loc, board):
     return board[tile_loc[0]][tile_loc[1]]
 
-def change_tile(tile_loc, change, board):
+def get_numbered_tiles(board):
+    numbered_tiles = [] # [[tile_row, tile_col, number], ...]
+        
+    for row_index, row in enumerate(board):
+        for col_index, item in enumerate(row):
+            if item.isdigit():
+                numbered_tiles.append([row_index, col_index, int(item)])
+    return numbered_tiles
+
+def get_tiles_around_tile(tile_loc, board):
     """
-    Function for moving on board
+    Returns [[row, col, tile_type], ...]
+    """
+    around_tile = []
+#   Shorten variables
+    row = tile_loc[0]
+    col = tile_loc[1]
     
-    Parameters:
-        change_info is a list denoting the change desired. Format [row, col, move]
-        e.g. [1,3,"F"]
-        Starts from 1, 1.
-    """
-    board[tile_loc[0]][tile_loc[1]] = change
-    print("Play row", tile_loc[0], "col", tile_loc[1])
-    return board
-
-
-
-
+    for i in range(-1, 2):
+        for k in range(-1, 2):
+            if not (i== 0 and k== 0):
+                around_tile.append([row+i, col+k, get_tile([row+i, col+k], board)])
+    
+    return around_tile
 
 # Testing
     
 if __name__ == "__main__":
     board = make_board()
     print_board(board)
-    board = change_tile([1,3], "F", board)
+    board = rul.change_tile([1,3], "F", board)
     print_board(board)

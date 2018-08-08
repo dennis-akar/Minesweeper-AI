@@ -36,6 +36,9 @@ Use Probability Theory to make wise choice
 
 """
 # Main Executor
+"""
+This is to serve as the main decision flow of the program.
+"""
 
 # Import own modules
 import representation as rep
@@ -45,6 +48,7 @@ import strategy as strat
 # Game constants
 row_count = 8
 col_count = 8
+total_bomb_count = 10
 
 board = rep.make_board(row_count, col_count)
 
@@ -52,13 +56,14 @@ rep.print_board(board)
 
 print(board)
 
-board = strat.change_random_tiles(row_count, col_count, board, amount=4, replace="3", strategy="no_sides")
+# Assign bombs to board.
+board = rul.change_random_tiles(row_count, col_count, board, amount=total_bomb_count, replace = "B", strategy="")
 
-#board = strat.unknowns_around_equal_to_number_tile(board)
+board = rul.change_random_tiles(row_count, col_count, board, amount=4, replace="3", strategy="no_sides")
 
 board = strat.probability_nearby(board)
 
-board= strat.probability_not_nearby(10, board)
+board= strat.probability_not_nearby(total_bomb_count, board)
 
 
 rep.print_board(board)
