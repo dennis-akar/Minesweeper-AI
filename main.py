@@ -48,11 +48,18 @@ col_count = 8
 
 board = rep.make_board(row_count, col_count)
 
-board = strat.change_random_tiles(row_count, col_count, board)
+rep.print_board(board)
+
+print(board)
+
+board = strat.change_random_tiles(row_count, col_count, board, amount=4, replace="3", strategy="no_sides")
 
 #board = strat.unknowns_around_equal_to_number_tile(board)
 
 board = strat.probability_nearby(board)
+
+board= strat.probability_not_nearby(10, board)
+
 
 rep.print_board(board)
 

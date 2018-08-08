@@ -4,6 +4,9 @@
 Created on Wed Aug  8 00:08:29 2018
 
 @author: denizhan
+
+!!!Why does changing board in print_board affect the global board variable?!!!
+
 """
 
 # Internal Representation of Game
@@ -13,7 +16,7 @@ def make_board(row_count=8, col_count=8):
     board = []
 
     board.append(["E"] * (col_count + 2))
-    for i in range(row_count+2):
+    for i in range(row_count):
         """
         Initialize base board
         """
@@ -30,9 +33,18 @@ def print_board(board):
     """
     Function to print board
     """
-    for row in board:
-        print((" ".join(row)))
+    for i in range(len(board)):
+        for k in range(len(board[0])):
+            tile = get_tile([i,k], board)
+            print(tile, end='')
+            if len(tile) == 1:
+                print("--.---", end='')
+            print(" ", end='')
+        print()
+#    for row in board:
+#        print((" ".join(row)))
     print()
+    return None
 
 def get_tile(tile_loc, board):
     return board[tile_loc[0]][tile_loc[1]]
