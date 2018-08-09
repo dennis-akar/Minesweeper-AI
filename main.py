@@ -13,6 +13,10 @@ TYPE: Perfect Information
 
 TODO, by priority
 
+Total conversion to class based system? 
+- No need to constantly insert board parameter.
+- Methods work more intricately.
+
 Construct internal data representation of game
 Formalize rules of game:
     ??? Make 2 modes: 

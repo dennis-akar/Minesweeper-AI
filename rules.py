@@ -10,7 +10,7 @@ Created on Wed Aug  8 00:09:03 2018
 
 """
 CHANGE Functions.
-Provides allowed core operations on board.
+Provides allowed core (basic) operative functions on board.
 """
 
 # Notice: Mostly for Python version of game.
