@@ -43,6 +43,11 @@ from random import randint
 #   Else:
 #       Show nearby empty tiles
 
+# CHANGE Functions.
+
+def play_game(board):
+    pass
+
 def assign_bombs(total_bomb_count, bomb, tile_loc="random"):
     if tile_loc == "random":
         pass
@@ -76,6 +81,7 @@ def change_random_tiles(row_count, col_count, board, amount=4, replace="8", stra
             board = change_tile(tile_loc, replace, board)
             rep.print_board(board)
     return board
+
 
 # Update board
 

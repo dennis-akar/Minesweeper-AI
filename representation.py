@@ -40,6 +40,8 @@ def print_board(board):
     for i in range(len(board)):
         for k in range(len(board[0])):
             tile = get_tile([i,k], board)
+            # Since the player shouldn't know a bomb exists, it must be concealed.
+            # For now, nothing, as we are converting to class based.
             print(tile, end='')
             if len(tile) == 1:
                 print("------", end='')
