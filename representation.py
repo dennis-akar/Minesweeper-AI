@@ -15,6 +15,13 @@ GET Functions.
 Provides access of data from board.
 """
 
+class Board:
+    """Represents the board"""
+    
+    # Insert constants here
+    
+    
+
 def make_board(row_count=8, col_count=8):
     # Board constants
     board = []
@@ -41,7 +48,7 @@ def print_board(board):
         for k in range(len(board[0])):
             tile = get_tile([i,k], board)
             # Since the player shouldn't know a bomb exists, it must be concealed.
-            # For now, nothing, as we are converting to class based.
+            # For now, nothing, as we are converting to class basedhttps://github.com/.
             print(tile, end='')
             if len(tile) == 1:
                 print("------", end='')
@@ -59,7 +66,7 @@ def get_numbered_tiles(board):
     numbered_tiles = [] # [[tile_row, tile_col, number], ...]
         
     for row_index, row in enumerate(board):
-        for col_index, item in enumerate(row):
+        for col_index, item in enumerate(row):https://github.com/
             if item.isdigit():
                 numbered_tiles.append([row_index, col_index, int(item)])
     return numbered_tiles
