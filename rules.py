@@ -48,12 +48,12 @@ from random import randint
 def play_game(board):
     pass
 
-def assign_bombs(total_bomb_count, bomb, tile_loc="random"):
-    if tile_loc == "random":
-        pass
+def assign_bombs(total_bomb_count, bomb, tile_loc=None):
+    if tile_loc is None:
+        change_random_tiles()
         
         
-def change_tile(tile_loc, change, board):
+def change_tile(tile_loc, change_to, board):
     """
     Function for moving on board
     
@@ -62,11 +62,11 @@ def change_tile(tile_loc, change, board):
         e.g. [1,3,"F"]
         Starts from 1, 1.
     """
-    board[tile_loc[0]][tile_loc[1]] = change
+    board[tile_loc[0]][tile_loc[1]] = change_to
     #print("Play row", tile_loc[0], "col", tile_loc[1])
     return board
 
-def change_random_tiles(row_count, col_count, board, amount=4, replace="8", strategy=""):
+def change_random_tiles(row_count, col_count, board, amount=4, change_to="8", strategy=""):
     """
     HACK: Choose 4 random tiles not at the sides or corners.
     HACK: Currently only replacing with 8
@@ -74,11 +74,11 @@ def change_random_tiles(row_count, col_count, board, amount=4, replace="8", stra
     for i in range(amount):
         if strategy == "no_sides":
             tile_loc = [randint(2, row_count-1), randint(2, col_count-1)]
-            board = change_tile(tile_loc, replace, board)
+            board = change_tile(tile_loc, change_to, board)
             rep.print_board(board)
         else:
             tile_loc = [randint(1, row_count), randint(1, col_count)]
-            board = change_tile(tile_loc, replace, board)
+            board = change_tile(tile_loc, change_to, board)
             rep.print_board(board)
     return board
 
