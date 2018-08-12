@@ -59,6 +59,8 @@ game = Minesweeper_with_AI(row_count, col_count, activity_mode, bomb_locations=b
 
 game.print_board()
 
+game.print_board(True)
+
 #game.probability_nearby()
 #
 #game.probability_not_nearby()

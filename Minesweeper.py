@@ -37,10 +37,9 @@ class Minesweeper:
             pass
         elif activity_mode == "analysis":
             self.bomb_locations = bomb_locations
-            self.total_bomb_count = 0
+            self.total_bomb_count = len(self.bomb_locations)
             for loc in bomb_locations:
                 self.change_tile(loc, "B")
-                self.total_bomb_count += 1
         elif activity_mode == "parsing":
             self.Parsing()
             
@@ -62,24 +61,18 @@ class Minesweeper:
         self.board.append(["E"] * (self.col_count + 2))
     
     
-    def print_board(self):
+    def print_board(self, analysis=False):
         """ Function to print board"""
         for i in range(len(self.board)):
             for k in range(len(self.board[0])):
-                tile = self.get_tile([i,k])
-                for unit in tile:
-                    if unit != "B":
-                        print(unit, end='')
-                # Since the player shouldn't know a bomb exists, it must be concealed.
-                # For now, nothing, as we are converting to class based
-                #print(tile, end='')
-                if len(tile) <= 2:
+                tile = self.get_tile([i,k], analysis)
+                print(tile, end='')
+                if len(tile) == 1:
                     print("------", end='')
                 print(" ", end='')
             print()
-    #    for row in board:
-    #        print((" ".join(row)))
         print()
+
         
     """
     GET Functions.
@@ -146,9 +139,8 @@ class Minesweeper:
             
     def change_tile(self, tile_loc, change_to):
         """
-        Function for moving on board.
-        TODO:
-            Update the board
+        Function for moving and updating board.
+        OPTIMIZE: Could have made updating a different method, perhaps later.
         
         Parameters:
             change_info is a list denoting the change desired. Format [row, col, move]
