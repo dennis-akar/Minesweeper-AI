@@ -151,6 +151,9 @@ class Minesweeper:
         # This is so that the player cannot know whether the tile is really
         # a bomb. However, we must add a way to update the board for the
         # player, as well as check if the player opened the bomb tile (game over)
+        
+        print("Trying to change tile at", tile_loc, "to", change_to)
+        
         if change_to == "B":
             "Change to bomb"
             self.board[tile_loc[0]][tile_loc[1]] = ["?", change_to]
@@ -173,8 +176,8 @@ class Minesweeper:
             # If bomb, game over
             if self.get_tile(tile_loc, analysis=True) == "B":
                 print("Game Over: You Lost!")
-            # Else:
-            else:
+            # Elif not simply empty:
+            elif self.get_tile(tile_loc) != "E":
             #   Check around that tile
                 tiles_around_tile = self.get_tiles_around_tile(tile_loc, True)
             #   If bomb(s) around tile:
@@ -185,13 +188,20 @@ class Minesweeper:
                 if bomb_count > 0:
             #       Change tile to number of bombs around tile
                     self.board[tile_loc[0]][tile_loc[1]] = str(bomb_count)
-            #   Else:
                 else:
+            #       Make empty
+                    self.board[tile_loc[0]][tile_loc[1]] = "E"
             #       For all tiles around tile:
                     for tile in tiles_around_tile:
             #           Change tiles around tile to open as well, recursive
+            #           Should not change "E"
                         self.change_tile(tile[:2], "O")
         
+        # If probability being given           
+        else:
+            print("ERROR: Command not understood.")
+            print("Please enter F, ? or O as a command.")
+    
     
     def change_random_tiles(self, amount, change_to, strategy="any tile"):
         """
