@@ -45,31 +45,35 @@ This is to serve as the main decision flow of the program.
 """
 
 # Import own modules
-import representation as rep
-import rules as rul
-import strategy as strat
+from Minesweeper import Minesweeper
+from AI import Minesweeper_with_AI
 
 # Game constants
 row_count = 8
 col_count = 8
-total_bomb_count = 10
+activity_mode = "analysis"  # game/analysis/parsing
+bomb_locations = [[3,3], [4,4]]
+#total_bomb_count = 10
 
-board = rep.make_board(row_count, col_count)
+game = Minesweeper_with_AI(row_count, col_count, activity_mode, bomb_locations=bomb_locations)
 
-rep.print_board(board)
-
-print(board)
+game.print_board()
 
 # Assign bombs to board.
-board = rul.change_random_tiles(row_count, col_count, board, amount=total_bomb_count, replace = "B", strategy="")
 
-board = rul.change_random_tiles(row_count, col_count, board, amount=4, replace="3", strategy="no_sides")
+#board = rul.change_random_tiles(row_count, col_count, board, amount=4, replace="3", strategy="no_sides")
 
-board = strat.probability_nearby(board)
+#board = AI.probability_nearby(board)
 
-board= strat.probability_not_nearby(total_bomb_count, board)
+#board= strat.probability_not_nearby(total_bomb_count, board)
+
+game.probability_nearby()
+
+game.probability_not_nearby()
+
+game.print_board()
 
 
-rep.print_board(board)
+#rep.print_board(board)
 
 

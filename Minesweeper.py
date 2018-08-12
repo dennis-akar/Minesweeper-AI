@@ -28,21 +28,22 @@ class Minesweeper:
         self.col_count = col_count
         self.activity_mode = activity_mode
         
+        self.make_board()
+        
         if activity_mode == "game":
             self.total_bomb_count = total_bomb_count
             self.change_random_tiles(self.total_bomb_count, "B")
             # Return bomb locations
             pass
         elif activity_mode == "analysis":
-            self.bomb_
+            self.bomb_locations = bomb_locations
+            self.total_bomb_count = 0
             for loc in bomb_locations:
                 self.change_tile(loc, "B")
-                pass
+                self.total_bomb_count += 1
         elif activity_mode == "parsing":
             self.Parsing()
         
-        self.bomb_locations = bomb_locations
-        self.make_board()
         
     def make_board(self):
         """ Constructs board according to row and col count"""
@@ -161,12 +162,10 @@ class Minesweeper:
                 tile_loc = [randint(1, self.row_count), randint(1, self.col_count)]
             
             if tile_loc not in tiles_to_change_loc:
-                tiles_to_change_loc.append
+                tiles_to_change_loc.append(tile_loc)
                     
-        
         for tile_loc in tiles_to_change_loc:
             self.change_tile(tile_loc, change_to)
-            self.print_board()
     
 
 class Parsing(Minesweeper):

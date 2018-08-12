@@ -25,7 +25,7 @@ from Minesweeper import Minesweeper
 
 # OPTIMIZE by skipping numbers already known.
 
-class AI(Minesweeper):
+class Minesweeper_with_AI(Minesweeper):
     """
     AI to use strategies to ensure maximum probability of success.
     """
