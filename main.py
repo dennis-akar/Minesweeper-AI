@@ -46,7 +46,7 @@ This is to serve as the main decision flow of the program.
 
 # Import own modules
 from Minesweeper import Minesweeper
-from AI import Minesweeper_with_AI
+from Minesweeper_with_AI import Minesweeper_with_AI
 
 # Game constants
 row_count = 8
@@ -59,19 +59,11 @@ game = Minesweeper_with_AI(row_count, col_count, activity_mode, bomb_locations=b
 
 game.print_board()
 
-# Assign bombs to board.
-
-#board = rul.change_random_tiles(row_count, col_count, board, amount=4, replace="3", strategy="no_sides")
-
-#board = AI.probability_nearby(board)
-
-#board= strat.probability_not_nearby(total_bomb_count, board)
-
-game.probability_nearby()
-
-game.probability_not_nearby()
-
-game.print_board()
+#game.probability_nearby()
+#
+#game.probability_not_nearby()
+#
+#game.print_board()
 
 
 #rep.print_board(board)

@@ -138,6 +138,8 @@ class Minesweeper_with_AI(Minesweeper):
             self.change_tile(tile[:2], tile[2] + "-" + str(probability))
         
         self.change_to_average_probability()
+        
+        print(self.board)
 
 
 

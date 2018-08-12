@@ -43,6 +43,8 @@ class Minesweeper:
                 self.total_bomb_count += 1
         elif activity_mode == "parsing":
             self.Parsing()
+            
+        print(self.board)
         
         
     def make_board(self):
@@ -65,10 +67,13 @@ class Minesweeper:
         for i in range(len(self.board)):
             for k in range(len(self.board[0])):
                 tile = self.get_tile([i,k])
+                for unit in tile:
+                    if unit != "B":
+                        print(unit, end='')
                 # Since the player shouldn't know a bomb exists, it must be concealed.
-                # For now, nothing, as we are converting to class basedhttps://github.com/.
-                print(tile, end='')
-                if len(tile) == 1:
+                # For now, nothing, as we are converting to class based
+                #print(tile, end='')
+                if len(tile) <= 2:
                     print("------", end='')
                 print(" ", end='')
             print()
@@ -81,11 +86,17 @@ class Minesweeper:
     Provides access of data from board.
     """
     
-    def get_tile(self, tile_loc):
+    def get_tile(self, tile_loc, analysis=False):
         """
         Returns tile at tile location
+        Analysis=True reveals 
         """
-        return self.board[tile_loc[0]][tile_loc[1]]
+        if analysis == True:
+            try:
+                return self.board[tile_loc[0]][tile_loc[1]][1]
+            except IndexError:
+                pass
+        return self.board[tile_loc[0]][tile_loc[1]][0]
     
     def get_numbered_tiles(self):
         """
@@ -96,11 +107,11 @@ class Minesweeper:
             
         for row_index, row in enumerate(self.board):
             for col_index, item in enumerate(row):
-                if item.isdigit():
+                if item[0].isdigit():
                     numbered_tiles.append([row_index, col_index, int(item)])
         return numbered_tiles
     
-    def get_tiles_around_tile(self, tile_loc):
+    def get_tiles_around_tile(self, tile_loc, analysis=False):
         """
         Returns [[row, col, tile_type], ...]
         """
@@ -112,7 +123,7 @@ class Minesweeper:
         for i in range(-1, 2):
             for k in range(-1, 2):
                 if not (i== 0 and k== 0):
-                    around_tile.append([row+i, col+k, self.get_tile([row+i, col+k])])
+                    around_tile.append([row+i, col+k, self.get_tile([row+i, col+k], analysis)])
         
         return around_tile
     
@@ -130,6 +141,7 @@ class Minesweeper:
         """
         #if tile_loc is None:
         #    self.change_random_tiles(amount)
+        pass
             
             
     def change_tile(self, tile_loc, change_to):
@@ -143,8 +155,50 @@ class Minesweeper:
             e.g. [1,3,"F"]
             Starts from 1, 1.
         """
-        self.board[tile_loc[0]][tile_loc[1]] = change_to
-        #print("Play row", tile_loc[0], "col", tile_loc[1])
+        # Assign bombs by making the tile into a list of "?" and "B".
+        # This is so that the player cannot know whether the tile is really
+        # a bomb. However, we must add a way to update the board for the
+        # player, as well as check if the player opened the bomb tile (game over)
+        if change_to == "B":
+            "Change to bomb"
+            self.board[tile_loc[0]][tile_loc[1]] = ["?", change_to]
+        
+        elif change_to == "F":
+            # Change to flagged
+            try:
+                self.board[tile_loc[0]][tile_loc[1]][0] = "F"
+            except TypeError:
+                self.board[tile_loc[0]][tile_loc[1]] = "F"
+                
+        elif change_to == "?":
+            try:
+                self.board[tile_loc[0]][tile_loc[1]][0] = "?"
+            except TypeError:
+                self.board[tile_loc[0]][tile_loc[1]] = "?"
+        
+        elif change_to == "O":
+            # Open tile
+            # If bomb, game over
+            if self.get_tile(tile_loc, analysis=True) == "B":
+                print("Game Over: You Lost!")
+            # Else:
+            else:
+            #   Check around that tile
+                tiles_around_tile = self.get_tiles_around_tile(tile_loc, True)
+            #   If bomb(s) around tile:
+                bomb_count = 0
+                for tile in tiles_around_tile:
+                    if tile[2] == "B":
+                        bomb_count += 1
+                if bomb_count > 0:
+            #       Change tile to number of bombs around tile
+                    self.board[tile_loc[0]][tile_loc[1]] = str(bomb_count)
+            #   Else:
+                else:
+            #       For all tiles around tile:
+                    for tile in tiles_around_tile:
+            #           Change tiles around tile to open as well, recursive
+                        self.change_tile(tile[:2], "O")
         
     
     def change_random_tiles(self, amount, change_to, strategy="any tile"):
