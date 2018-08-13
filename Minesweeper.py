@@ -42,8 +42,6 @@ class Minesweeper:
                 self.change_tile(loc, "B", show_print=False)
         elif activity_mode == "parsing":
             self.Parsing()
-            
-        print(self.board)
         
         
     def make_board(self):
@@ -63,15 +61,26 @@ class Minesweeper:
     
     def print_board(self, analysis=False):
         """ Function to print board"""
+        flagged_tile_count = 0
+        print("[0]", end=" ")
         for i in range(1, self.row_count+1):
+            print("[" + str(i) + "]", end=" ")
+        print()
+        for i in range(1, self.row_count+1):
+            print("[" + str(i) + "]", end="  ")
             for k in range(1, self.row_count+1):
                 tile = self.get_tile([i,k], analysis)
-                print(tile, end='')
+                if tile == "F":
+                    flagged_tile_count += 1
+                print(tile, end='  ')
                 if len(tile) == 1:
-                    print("------", end='')
+                    #print(str(i) + "," + str(k), end="")
+#                    print("------", end='')
+                    pass
                 print(" ", end='')
             print()
-        print()
+        print("Flagged bombs to total bombs:", str(flagged_tile_count) + 
+              "/" + str(self.total_bomb_count) + "\n")
 
         
     """
