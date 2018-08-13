@@ -32,14 +32,14 @@ class Minesweeper:
         
         if activity_mode == "game":
             self.total_bomb_count = total_bomb_count
-            self.change_random_tiles(self.total_bomb_count, "B")
+            self.change_random_tiles(self.total_bomb_count, "B", show_print=False)
             # Return bomb locations
             pass
         elif activity_mode == "analysis":
             self.bomb_locations = bomb_locations
             self.total_bomb_count = len(self.bomb_locations)
             for loc in bomb_locations:
-                self.change_tile(loc, "B")
+                self.change_tile(loc, "B", show_print=False)
         elif activity_mode == "parsing":
             self.Parsing()
             
@@ -63,8 +63,8 @@ class Minesweeper:
     
     def print_board(self, analysis=False):
         """ Function to print board"""
-        for i in range(len(self.board)):
-            for k in range(len(self.board[0])):
+        for i in range(1, self.row_count+1):
+            for k in range(1, self.row_count+1):
                 tile = self.get_tile([i,k], analysis)
                 print(tile, end='')
                 if len(tile) == 1:
@@ -137,7 +137,7 @@ class Minesweeper:
         pass
             
             
-    def change_tile(self, tile_loc, change_to):
+    def change_tile(self, tile_loc, change_to, show_print=True):
         """
         Function for moving and updating board.
         OPTIMIZE: Could have made updating a different method, perhaps later.
@@ -152,7 +152,8 @@ class Minesweeper:
         # a bomb. However, we must add a way to update the board for the
         # player, as well as check if the player opened the bomb tile (game over)
         
-        print("Trying to change tile at", tile_loc, "to", change_to)
+        if show_print:
+            print("Trying to change tile at", tile_loc, "to", change_to)
         
         if change_to == "B":
             "Change to bomb"
@@ -176,6 +177,8 @@ class Minesweeper:
             # If bomb, game over
             if self.get_tile(tile_loc, analysis=True) == "B":
                 print("Game Over: You Lost!")
+                self.print_board(analysis=True)
+                return None
             # Elif not simply empty:
             elif self.get_tile(tile_loc) != "E":
             #   Check around that tile
@@ -195,15 +198,20 @@ class Minesweeper:
                     for tile in tiles_around_tile:
             #           Change tiles around tile to open as well, recursive
             #           Should not change "E"
-                        self.change_tile(tile[:2], "O")
+                        self.change_tile(tile[:2], "O", show_print=False)
         
         # If probability being given           
         else:
             print("ERROR: Command not understood.")
             print("Please enter F, ? or O as a command.")
+        
+        if show_print:
+            self.print_board()
+        if self.check_if_win():
+            print("Congratulations: You Won!")
     
     
-    def change_random_tiles(self, amount, change_to, strategy="any tile"):
+    def change_random_tiles(self, amount, change_to, strategy="any tile", show_print=True):
         """
         Change random tiles on the board according to:
             amount
@@ -221,7 +229,14 @@ class Minesweeper:
                 tiles_to_change_loc.append(tile_loc)
                     
         for tile_loc in tiles_to_change_loc:
-            self.change_tile(tile_loc, change_to)
+            self.change_tile(tile_loc, change_to, show_print)
+            
+    def check_if_win(self):
+        for i in range(1, self.row_count+1):
+            for k in range(1, self.row_count+1):
+                if self.get_tile([i,k]) == "?":
+                    return False
+        return True
     
 
 class Parsing(Minesweeper):

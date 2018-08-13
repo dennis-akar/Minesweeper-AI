@@ -88,7 +88,7 @@ class Minesweeper_with_AI(Minesweeper):
         #   if number of unknown tiles == number of tile - flagged tiles:
         #       flag those unknown tiles
             if unknown_count == number:
-                self.change_tiles_around_tile(tile_loc, ["?"], "F", condition_type = "starting_with")
+                self.change_tiles_around_tile(tile_loc, "?", "F", condition_type = "starting_with")
             else:
                 # Get probability, assign to background info of tile
                 # (Make rep function to add info, but in print only give first lettter)

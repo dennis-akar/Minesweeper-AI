@@ -63,13 +63,15 @@ game.print_board(analysis=True)
 
 game.change_tile([1,1], "O")
 
-game.print_board()
+#print(game.get_tile([1,2]))
+#
+#print(game.get_tile([5,5]))
 
-game.print_board(True)
+#game.print_board(True)
 
 game.change_tile([4,4], "O")
 
-game.print_board(True)
+#game.probability_nearby()
 
 
 #game.probability_nearby()
