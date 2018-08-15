@@ -34,6 +34,7 @@ class Minesweeper:
             self.total_bomb_count = total_bomb_count
             self.change_random_tiles(self.total_bomb_count, "B", show_print=False)
             # Return bomb locations
+            print("game")
             pass
         elif activity_mode == "analysis":
             self.bomb_locations = bomb_locations
@@ -42,6 +43,7 @@ class Minesweeper:
                 self.change_tile(loc, "B", show_print=False)
         elif activity_mode == "parsing":
             self.Parsing()
+        print("super init accessed")
         
         
     def make_board(self):

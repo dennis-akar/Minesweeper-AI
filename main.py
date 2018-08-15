@@ -13,24 +13,24 @@ TYPE: Perfect Information
 
 TODO, by priority
 
-Total conversion to class based system? 
+Total conversion to class based system?
 - No need to constantly insert board parameter.
 - Methods work more intricately.
 
 Construct internal data representation of game
 Formalize rules of game:
-    ??? Make 2 modes: 
+    ??? Make 2 modes:
         ??? Play minesweeper on python
         Parse screen data and play
 Formalize strategy to win game
     Choose starting locations anywhere other than middle
     For now choose just 4. If blank space is not found, continue pressing.
-    
-    Only consider empty tiles 
-    
-    If the number of empty tiles around warning number is equal to the 
+
+    Only consider empty tiles
+
+    If the number of empty tiles around warning number is equal to the
     warning number minus bomb tiles flagged around it, they are bombs.
-    
+
     Else: Probability
 
 Use OpenCV to take minesweeper game data
@@ -71,7 +71,9 @@ game.change_tile([1,1], "O")
 
 game.change_tile([4,4], "O")
 
-game.probability_nearby()
+game.print_prob_board()
+
+#game.probability_nearby()
 
 
 #game.probability_nearby()
@@ -80,7 +82,4 @@ game.probability_nearby()
 #
 #game.print_board()
 
-
 #rep.print_board(board)
-
-
