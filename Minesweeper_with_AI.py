@@ -16,7 +16,10 @@ At the start of every strategy, the prob board is to be updated by the new board
 
 For every change the AI makes, the prob board is to be updated by the new board.
 
-Update for every bo
+Or perhaps scrap that. Each time a probability change is made, we can
+update it? But what about before making the probability assessment? That
+won't be affected because the strategy will be utlizing the get_board function
+anyway.
 
 """
 
@@ -39,7 +42,6 @@ class Minesweeper_with_AI(Minesweeper):
 
     prob_board = []
 
-    #Minesweeper_with_AI.make_prob_board(Minesweeper_with_AI)
 
     def __init__(self, row_count=8, col_count=8, activity_mode = "game",
                  total_bomb_count=10, bomb_locations=[]):
@@ -48,60 +50,102 @@ class Minesweeper_with_AI(Minesweeper):
                              total_bomb_count, bomb_locations)
 
         self.make_prob_board()
-
+        
+        
     def make_prob_board(self):
+        self.prob_board.append(["E"] * (self.col_count + 2))
+        for i in range(self.row_count):
+            """
+            Initialize base prob_board
+            """
+            self.prob_board.append(["E"])
+            for k in range(self.col_count):
+                self.prob_board[i+1].append(["?", 0, 0.0])
+            self.prob_board[i+1].append(["E", 1, 0.0])
+        
+        self.prob_board.append(["E", 1, 0.0] * (self.col_count + 2))
+
+
+    def update_prob_board(self):
         """
         Constructs board according to row and col count.
         The main source however is the board itself (we get by get_board)
+        
+        Also change tiles with prob 1.0 and 0.0 .
         
         Format: [[[tile, prob], [tile, prob], ...], 
                  [[tile, prob], [tile, prob], ...]]
         
         This includes even the probabilties of empty and flagged tiles.
         """
-        self.prob_board.append(["E", 0.0] * (self.col_count + 2))
         
         for i in range(1, self.row_count+1):
-            self.prob_board.append(["E", 0.0])
             for k in range(1, self.col_count+1):
+                # format: [tile, num_of_probs, prob1, prob2, ... probN]
                 tile = self.get_tile([i,k])
-                if tile == "?":
-                    self.prob_board[i][k] = ["?", "?.??"]
                 if tile == "E":
-                    self.prob_board[i][k] = ["E", 0.0]
-                if tile == "F":
-                    self.prob_board[i][k] = ["F", 1.0]
-                    
-            self.prob_board[i].append("E", 0.0)
-
-        self.prob_board.append(["E", 0.0] * (self.col_count + 2))
-
-
-    def update_board(self):
+                    self.prob_board[i][k] = ["E", 1, 0.0]
+                elif tile.isdigit():
+                    self.prob_board[i][k] = [tile, 1, 0.0]
+                elif tile == "F":
+                    self.prob_board[i][k] = ["F", 1, 1.0]
+                
+                if self.prob_board[i][k][2] == 0.0:
+                    self.change_tile([i,k], "O")
+                elif self.prob_board[i][k][2] == 1.0:
+                    self.change_tile([i,k], "F")
+                        
+    
+    def get_tile_and_prob(self, loc):
         """
-        Perhaps we can check the latest version of the board and update it
-        every time a strategy is called?
+        Returns tile and prob as [tile, prob]
         """
-        for i in range(1, self.row_count+1):
-            for k in range(1, self.col_count+1):
-                tile = self.get_tile([i,k])
-                tile_prob
-                if tile == "?":
-                    self.prob_board[i][k] = ["?", "?.??"]
-                if tile == "E":
-                    self.prob_board[i][k] = ["E", 0.0]
-                if tile == "F":
-                    self.prob_board[i][k] = ["F", 1.0]
-                    
-            self.prob_board[i].append("E", 0.0)
-
-        self.prob_board.append(["E", 0.0] * (self.col_count + 2))
+        return self.prob_board[loc[0]][loc[1]]
+                        
         
     def change_tile_prob(self, loc, probability):
         """
         Add given probability to the tile
+        Get the average by:
+            the number of probabilities (self.get_tile_prob([1])
+            the probabilities (self.get_tile_prob)
         """
-        self.prob_board[loc[0]][loc[1]] = [self.get_tile([loc[0], loc[1]]), probability]
+        
+        self.update_prob_board()
+        
+        old_avg_prob = self.prob_board[loc[0]][loc[1]][2]
+        
+#        assert old_avg_prob != 1.0, "You should probably not change a tile with 1.0 bomb prob"
+#        
+#        assert old_avg_prob != 0.0, "You should probably not change a tile with 0.0 bomb prob"
+        
+        self.prob_board[loc[0]][loc[1]][1] += 1
+        
+        # Get the second item of the tile, which indicates the number
+        # of probabilities within a single tile.
+        # Calculate the average probability of a single tile.
+        number_of_probs = self.prob_board[loc[0]][loc[1]][1]
+        prob_sum = old_avg_prob + probability
+#        total_probability = round(sum([float(x) for x in prob_values]) /
+#                                  number_of_probs, 1)
+        avg_prob = round(prob_sum / number_of_probs)
+        
+        self.print_prob_board()
+        
+        assert 0.0 <= avg_prob <= 1.0, "Probability of tile" + str([loc[0], loc[1]]) + " with " + str(avg_prob) + "not possible."
+            
+        self.prob_board[loc[0]][loc[1]][2] = avg_prob
+        
+        self.update_prob_board()
+            
+    
+        
+#        if len(self.prob_board[loc[0]][loc[1]]) == 1:
+#            self.prob_board[loc[0]][loc[1]] = [self.get_tile([loc[0], loc[1]]), probability]
+#        
+#        else:
+#            self.prob_board[loc[0]][loc[1]] = [self.get_tile([loc[0], loc[1]]), probability]
+            
         
     #def get_prob_board(self):
         
@@ -110,9 +154,13 @@ class Minesweeper_with_AI(Minesweeper):
         """
         Print board as so: [[tile, prob], [tile, prob], ...]
         """
-#        """ Function to print board"""
-#        for i in range(1, self.row_count+1):
-#            for k in range(1, self.row_count+1):
+        self.update_prob_board()
+        
+        for i in range(1, self.row_count+1):
+            for k in range(1, self.row_count+1):
+                print(self.get_tile_and_prob([i,k]), end=" ")
+            print()
+        print()
 #                tile = self.get_tile([i,k])
 #                print(tile, end='')
 #                if len(tile) == 1:
@@ -122,36 +170,36 @@ class Minesweeper_with_AI(Minesweeper):
 #        print()
 
 
-    def change_tiles_around_tile(self, tile_loc, condition, change, condition_type = None):
+    def change_tiles_around_tile(self, tile_loc, condition, change):
         around_tile = self.get_tiles_around_tile(tile_loc)
 
         for tile_info in around_tile:
-            if tile_info[2][:len(condition)] == condition and condition_type == "starting_with":
+            if tile_info[2] == condition:
                 self.change_tile(tile_info[:2], change)
-            elif tile_info[2] == condition:
-                self.change_tile(tile_info[:2], change)
+                
 
-    def change_to_average_probability(self):
-        """
-        Scan through every tile. If[2][0] first two letters "?-", split by "-",
-        sum list and divide by len, round to 3
-        """
-        for i in range(1, len(self.board)-1):
-            for k in range(1, len(self.board[0])-1):
-                temp_tile = self.get_tile([i,k])
-                if temp_tile[:2] == "?-":
-                    prob_values = temp_tile.split("-")[1:]
-                    total_probability = round(sum([float(x) for x in prob_values])
-                                                    / len(prob_values), 3)
-                    if total_probability > 1.0:
-                        print("Probability of tile", i, k, "not possible.")
-                        self.print_board()
-                        raise Exception
-                    total_probability = str(total_probability)
-                    while len(total_probability) < 5:
-                        total_probability += "0"
-
-                    self.change_tile([i,k], "?-" + total_probability)
+#    def change_to_average_probability(self):
+#        """
+#        Scan through every tile. If[2][0] first two letters "?-", split by "-",
+#        sum list and divide by len, round to 3
+#        """
+#        for i in range(1, self.row_count+1):
+#            for k in range(1, self.col_count+1):
+#                tile = self.get_tile_and_prob([i,k])[0]
+#                tile_prob = self.get_tile_and_prob([i,k])[1]
+#                if tile == "?":
+#                    prob_values = temp_tile.split("-")[1:]
+#                    total_probability = round(sum([float(x) for x in prob_values])
+#                                                    / len(prob_values), 3)
+#                    if total_probability > 1.0:
+#                        print("Probability of tile", i, k, "not possible.")
+#                        self.print_board()
+#                        raise Exception
+#                    total_probability = str(total_probability)
+#                    while len(total_probability) < 5:
+#                        total_probability += "0"
+#
+#                    self.change_tile_prob([i,k], total_probability)
 
     # STRATEGY Functions
 
@@ -182,19 +230,25 @@ class Minesweeper_with_AI(Minesweeper):
         #   if number of unknown tiles == number of tile - flagged tiles:
         #       flag those unknown tiles
             if unknown_count == number:
-                self.change_tiles_around_tile(tile_loc, "?", "F", condition_type = "starting_with")
+                self.change_tiles_around_tile(tile_loc, "?", "F")
+                
             else:
                 # Get probability, assign to background info of tile
                 # (Make rep function to add info, but in print only give first lettter)
                 # [?-0.45-0.54-0.67] for example, second or third significant digit.
-                probability = round(number / unknown_count, 3)
+                probability = number / unknown_count
                 for tile in around_tile:
                     if tile[2][0][0] == "?":
-                        self.chang
+                        self.change_tile_prob(tile[:2], probability)
                         #self.change_tile(tile[:2], tile[2][:] + "-" + str(probability))
 
-            self.change_to_average_probability()
 
+#    def change_prob_one_zero_tiles(self):
+#        
+#        for i in range(1, self.row_count+1):
+#            for k in range(1, self.row_count+1):
+#                if self.prob_board[i][k][2] == 0.0:
+#                    self.change_tile([i,k], "F")
 
     def probability_not_nearby(self):
         """
@@ -226,13 +280,11 @@ class Minesweeper_with_AI(Minesweeper):
                     remaining_bomb_count -= 1
 
         # Calculate probability
-        probability = round(remaining_bomb_count / len(not_nearby_tiles), 3)
+        probability = round(remaining_bomb_count / len(not_nearby_tiles), 1)
 
         # Add necessary information
         for tile in not_nearby_tiles:
-            self.change_tile(tile[:2], tile[2] + "-" + str(probability))
-
-        self.change_to_average_probability()
+            self.change_tile_prob(tile[:2], probability)
 
 
 

@@ -189,6 +189,7 @@ class Minesweeper:
             if self.get_tile(tile_loc, analysis=True) == "B":
                 print("Game Over: You Lost!")
                 self.print_board(analysis=True)
+                del self.board
                 return None
             # Elif not simply empty:
             elif self.get_tile(tile_loc) != "E":
