@@ -27,6 +27,7 @@ class Minesweeper:
         self.row_count = row_count
         self.col_count = col_count
         self.activity_mode = activity_mode
+        self.game_over_state = 0 # 0 = Not over, -1 = Lost, 1 = Win
         
         self.make_board()
         
@@ -166,6 +167,10 @@ class Minesweeper:
         if show_print:
             print("Trying to change tile at", tile_loc, "to", change_to)
         
+        
+        assert self.game_over_state == 0, "Game has ended. You cannot change a tile."
+        
+        
         if change_to == "B":
             "Change to bomb"
             self.board[tile_loc[0]][tile_loc[1]] = ["?", change_to]
@@ -189,7 +194,8 @@ class Minesweeper:
             if self.get_tile(tile_loc, analysis=True) == "B":
                 print("Game Over: You Lost!")
                 self.print_board(analysis=True)
-                del self.board
+                self.game_over_state = -1
+                #del self.board
                 return None
             # Elif not simply empty:
             elif self.get_tile(tile_loc) != "E":
@@ -223,7 +229,7 @@ class Minesweeper:
             print("Congratulations: You Won!")
     
     
-    def change_random_tiles(self, amount, change_to, strategy="any tile", show_print=True):
+    def change_random_tiles(self, amount, change_to, strategy="any_tile", show_print=True):
         """
         Change random tiles on the board according to:
             amount
@@ -248,6 +254,8 @@ class Minesweeper:
             for k in range(1, self.row_count+1):
                 if self.get_tile([i,k]) == "?":
                     return False
+        
+        self.game_over_state = 1
         return True
     
 
