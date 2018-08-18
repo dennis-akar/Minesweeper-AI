@@ -100,6 +100,10 @@ class Minesweeper_with_AI(Minesweeper):
                         
                     elif prob == least_prob:
                         least_prob_locs.append([i,k])
+                        
+                    if prob == 1.0:
+                        self.change_tile([i,k], "F")
+                        self.update_prob_board()
                     
         tile_to_change = least_prob_locs[0]
         if len(least_prob_locs) > 1:
@@ -114,6 +118,8 @@ class Minesweeper_with_AI(Minesweeper):
                     tile_to_change = [loc[0], loc[1]]
             
         self.change_tile(tile_to_change[:2], "O")
+        
+        self.update_prob_board()
         
             
         #self.print_prob_board()
@@ -153,6 +159,7 @@ class Minesweeper_with_AI(Minesweeper):
             for k in range(1, self.col_count+1):
                 # format: [tile, num_of_probs, prob1, prob2, ... probN]
                 tile = self.get_tile([i,k])
+                print(tile)
                 if tile == "E":
                     self.prob_board[i][k] = ["E", 0, 0.0]
                 elif tile.isdigit():
