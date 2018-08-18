@@ -144,7 +144,7 @@ class Minesweeper_with_AI(Minesweeper):
                 self.prob_board[i+1].append(["?", 0, 0.0])
             self.prob_board[i+1].append(["E", 0, 0.0])
         
-        self.prob_board.append(["E", 0, 0.0] * (self.col_count + 2))
+        self.prob_board.append(["E"] * (self.col_count + 2))
 
 
     def update_prob_board(self):
@@ -198,7 +198,10 @@ class Minesweeper_with_AI(Minesweeper):
 #        
 #        assert old_avg_prob != 0.0, "You should probably not change a tile with 0.0 bomb prob"
         
+        # Increase tile prob count
         self.prob_board[loc[0]][loc[1]][1] += 1
+        
+        assigned_probs_count = self.prob_board[loc[0]][loc[1]][1]
         
         # Get the second item of the tile, which indicates the number
         # of probabilities within a single tile.
@@ -211,8 +214,14 @@ class Minesweeper_with_AI(Minesweeper):
             new_prob = round(prob_sum / number_of_probs, 3)
             
         elif strategy == "minimax":
-            if probability > old_prob:
+            print(probability, old_prob)
+            if old_prob == 1.0 or (old_prob == 0.0 and assigned_probs_count > 1):
+                new_prob = old_prob
+            elif probability == 1.0 or probability == 0.0:
+                new_prob = probability
+            elif probability > old_prob:
                 new_prob = round(probability, 3)
+                print("new prob")
             else:
                 new_prob = round(old_prob, 3)
         
@@ -256,12 +265,12 @@ class Minesweeper_with_AI(Minesweeper):
 #        print()
 
 
-    def change_tiles_around_tile(self, tile_loc, condition, change):
+    def change_tiles_prob_around_tile(self, tile_loc, condition, change):
         around_tile = self.get_tiles_around_tile(tile_loc)
 
         for tile_info in around_tile:
             if tile_info[2] == condition:
-                self.change_tile(tile_info[:2], change)
+                self.change_tile_prob(tile_info[:2], change)
                 
 
 #    def change_to_average_probability(self):
@@ -320,19 +329,21 @@ class Minesweeper_with_AI(Minesweeper):
             for tile in around_tile:
                 if tile[2][0][0] == "?":
                     unknown_count += 1
-                elif tile[2] == "F" or tile[2].isdigit():
+                # If bomb, then already we have one
+                elif tile[2] == "F":
                     number -= 1
 
         #   if number of unknown tiles == number of tile - flagged tiles:
-        #       flag those unknown tiles
-            if unknown_count == number:
-                self.change_tiles_around_tile(tile_loc, "?", "F")
+        #       probablility that they are bombs is 1.0
+            if unknown_count == int(number):
+                self.change_tiles_prob_around_tile(tile_loc, "?", 1.0)
                 
             else:
                 # Get probability, assign to background info of tile
                 # (Make rep function to add info, but in print only give first lettter)
                 # [?-0.45-0.54-0.67] for example, second or third significant digit.
-                probability = number / unknown_count
+                probability = round(number / unknown_count, 3)
+                print("number", number, "unknown", unknown_count, "loc", tile_loc, "nearprob", probability)
                 for tile in around_tile:
                     if tile[2][0][0] == "?":
                         self.change_tile_prob(tile[:2], probability)

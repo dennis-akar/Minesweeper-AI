@@ -54,37 +54,10 @@ from Minesweeper_with_AI import Minesweeper_with_AI
 # Game constants
 row_count = 8
 col_count = 8
-activity_mode = "analysis"  # game/analysis/parsing
+activity_mode = "game"  # game/analysis/parsing
 bomb_locations = [[1,3], [2,3], [5,4],] #[4,1], [2,3], [2,5], [3,6], [3,5]]
-#total_bomb_count = 10
+total_bomb_count = 10
 
 game = Minesweeper_with_AI(row_count, col_count, activity_mode, 
-                           #total_bomb_count=total_bomb_count,)
+                           total_bomb_count=total_bomb_count,
                            bomb_locations=bomb_locations)
-
-#game.print_board()
-#
-#game.print_board(analysis=True)
-
-#game.change_tile([1,1], "O")
-
-#print(game.get_tile([1,2]))
-#
-#print(game.get_tile([5,5]))
-
-#game.print_board(True)
-
-#game.change_tile([4,4], "O")
-
-#game.print_prob_board()
-#
-#game.probability_nearby()
-
-
-#game.probability_nearby()
-#
-#game.probability_not_nearby()
-#
-#game.print_board()
-
-#rep.print_board(board)
