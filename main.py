@@ -52,10 +52,10 @@ from Minesweeper import Minesweeper
 from Minesweeper_with_AI import Minesweeper_with_AI
 
 # Game constants
-row_count = 8
-col_count = 8
-activity_mode = "game"  # game/analysis/parsing
-bomb_locations = [[1,3], [2,3], [5,4],] #[4,1], [2,3], [2,5], [3,6], [3,5]]
+row_count = 3
+col_count = 3
+activity_mode = "analysis"  # game/analysis/parsing
+bomb_locations = [[1,1], [2,3]] #[4,1], [2,3], [2,5], [3,6], [3,5]]
 total_bomb_count = 10
 
 game = Minesweeper_with_AI(row_count, col_count, activity_mode, 

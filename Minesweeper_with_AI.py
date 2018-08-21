@@ -40,7 +40,6 @@ class Minesweeper_with_AI(Minesweeper):
     AI to use strategies to ensure maximum probability of success.
     """
 
-    #prob_board = []
 
 
     def __init__(self, row_count=8, col_count=8, activity_mode = "game",
@@ -55,7 +54,6 @@ class Minesweeper_with_AI(Minesweeper):
             print("ai_next_move")
             self.ai_next_move()
         
-#        self.ai_next_move()
             
     
     def ai_next_move(self):
@@ -162,8 +160,6 @@ class Minesweeper_with_AI(Minesweeper):
         
         print("Updating probability board...")
         
-        self.make_board()
-        
         for i in range(1, self.row_count+1):
             for k in range(1, self.col_count+1):
                 # format: [tile, num_of_probs, prob1, prob2, ... probN]
@@ -214,14 +210,13 @@ class Minesweeper_with_AI(Minesweeper):
             new_prob = round(prob_sum / number_of_probs, 3)
             
         elif strategy == "minimax":
-            print(probability, old_prob)
+            #print(probability, old_prob)
             if old_prob == 1.0 or (old_prob == 0.0 and assigned_probs_count > 1):
-                new_prob = old_prob
+                new_prob = round(old_prob, 3)
             elif probability == 1.0 or probability == 0.0:
-                new_prob = probability
+                new_prob = round(probability, 3)
             elif probability > old_prob:
                 new_prob = round(probability, 3)
-                print("new prob")
             else:
                 new_prob = round(old_prob, 3)
         
@@ -359,6 +354,13 @@ class Minesweeper_with_AI(Minesweeper):
 
     def probability_not_nearby(self):
         """
+        TODO
+        For every tile:
+            If F, append loc to possible_bombs. Substract 1 from remaining bombs
+            If digit, check around, substract from digit for every number
+            Basically best case scenario for nearby probs, remove the number of
+            bombs from remaining bombs
+            Then give probability.
         """
         
         print("Calculating the probability of not-nearby tiles...")
@@ -386,7 +388,7 @@ class Minesweeper_with_AI(Minesweeper):
                 # HACK If number tile, substract 1 from remaining bomb count.
                 # TODO: Find nearby number tiles, substract by combination possible
                 # which would minimize nearby bomb count.
-                elif isinstance(tile, int):
+                elif tile.isdigit():
                     remaining_bomb_count -= 1
 
         if len(not_nearby_tiles) == 0:
@@ -394,14 +396,55 @@ class Minesweeper_with_AI(Minesweeper):
         
         # Calculate probability
         probability = round(remaining_bomb_count / len(not_nearby_tiles), 3)
-        print(remaining_bomb_count, len(not_nearby_tiles))
-        print(probability)
+        #print(remaining_bomb_count, len(not_nearby_tiles))
+        #print(probability)
 
         # Add necessary information
         for tile in not_nearby_tiles:
             self.change_tile_prob(tile[:2], probability)
 #            print(tile[:2], probability)
 #            print(self.prob_board)
+            
+    
+    def make_simulation_board(self, loc):
+        """
+        Creates a new board to make simulations on
+        """
+        print("Initilizing simulation board...")
+        
+        # Initialize board list by iterating E's for the
+        # col_count and row_count
+        self.simul_board = [["E"] * (self.col_count + 2)] * (self.row_count + 2)
+        
+        # Check every tile on real board.
+        # Replace the simulated tile with the real one.
+        for i in range(1, self.row_count+1):
+            for k in range(1, self.col_count+1):
+                # format: [tile, num_of_probs, prob1, prob2, ... probN]
+                tile = self.get_tile([i,k])
+                self.simul_board[i][k] = tile
+        
+        
+    
+    def simulate(self, loc):
+        """
+        Simulate tile change on simulation_board(self,loc)
+        
+        DISCUSSION
+        Make new simulation = Minesweeper(analysis=True) class?
+        
+        However it might be overkill if we only want to check what would
+        happen next.
+        
+        Perhaps it would be better if we just try as "assume [loc] is a bomb
+        tile. Check if remaining tiles would remain possible." (no more bombs
+        left but clearly there is a bomb next to a tile which would not remain)
+        """
+        self.make_simulation_board()
+        
+        
+        
+        
 
 
 
