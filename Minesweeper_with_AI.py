@@ -207,18 +207,18 @@ class Minesweeper_with_AI(Minesweeper):
             number_of_probs = self.prob_board[loc[0]][loc[1]][1]
             prob_sum = old_prob + probability
     
-            new_prob = round(prob_sum / number_of_probs, 3)
+            new_prob = round(prob_sum / number_of_probs, 2)
             
         elif strategy == "minimax":
             #print(probability, old_prob)
             if old_prob == 1.0 or (old_prob == 0.0 and assigned_probs_count > 1):
-                new_prob = round(old_prob, 3)
+                new_prob = round(old_prob, 2)
             elif probability == 1.0 or probability == 0.0:
-                new_prob = round(probability, 3)
+                new_prob = round(probability, 2)
             elif probability > old_prob:
-                new_prob = round(probability, 3)
+                new_prob = round(probability, 2)
             else:
-                new_prob = round(old_prob, 3)
+                new_prob = round(old_prob, 2)
         
         assert 0.0 <= new_prob <= 1.0, "Probability of tile" + str([loc[0], loc[1]]) + " with " + str(new_prob) + "not possible."
             
@@ -245,7 +245,7 @@ class Minesweeper_with_AI(Minesweeper):
         for i in range(1, self.row_count+1):
             for k in range(1, self.row_count+1):
                 text = str(self.get_tile_and_prob([i,k]))
-                while len(text) < 15:
+                while len(text) < 14:
                     text += " "
                     
                 print(text, end=" ")
@@ -369,6 +369,9 @@ class Minesweeper_with_AI(Minesweeper):
         not_nearby_tiles = []
         # For every non-border tile, calculate remaining bomb count and check if
         # not nearby. If not-nearby, add to list.
+        
+        nearby_unknown_locations = []
+        
         for i in range(1, self.row_count+1):
             for k in range(1, self.col_count+1):
                 tile = self.get_tile([i,k])
@@ -388,7 +391,13 @@ class Minesweeper_with_AI(Minesweeper):
                 # HACK If number tile, substract 1 from remaining bomb count.
                 # TODO: Find nearby number tiles, substract by combination possible
                 # which would minimize nearby bomb count.
+                
+                # Get locations of nearby unknowns
                 elif tile.isdigit():
+                    for around_tile in self.get_tiles_around_tile([i,k]):
+                        for i_temp, k_temp, tile_type in around_tile:
+                            if tile_type == "?" and [i_temp,k_temp] not in nearby_unknown_locations:
+                                nearby_unknown_locations.append([i_temp,k_temp])
                     remaining_bomb_count -= 1
 
         if len(not_nearby_tiles) == 0:
@@ -441,6 +450,8 @@ class Minesweeper_with_AI(Minesweeper):
         left but clearly there is a bomb next to a tile which would not remain)
         """
         self.make_simulation_board()
+        simulation = Minesweeper()
+        
         
         
         

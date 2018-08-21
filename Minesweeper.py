@@ -22,7 +22,7 @@ class Minesweeper:
     
     
     def __init__(self, row_count=8, col_count=8, activity_mode = "game",
-                 total_bomb_count=10, bomb_locations=[]):
+                 total_bomb_count=10, bomb_locations=[], board=[]):
         """ Initializes the board"""
         self.row_count = row_count
         self.col_count = col_count
@@ -42,7 +42,9 @@ class Minesweeper:
             self.total_bomb_count = len(self.bomb_locations)
             for loc in bomb_locations:
                 self.change_tile(loc, "B", show_print=False)
-        elif activity_mode == "parsing":
+        elif activity_mode == "parse_board":
+            self.board= board
+        elif activity_mode == "parse_window":
             self.Parsing()
         print("super init accessed")
         

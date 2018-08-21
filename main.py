@@ -52,11 +52,31 @@ from Minesweeper import Minesweeper
 from Minesweeper_with_AI import Minesweeper_with_AI
 
 # Game constants
-row_count = 3
-col_count = 3
-activity_mode = "analysis"  # game/analysis/parsing
+row_count = 8
+col_count = 8
+activity_mode = "game"  # game/analysis/parsing
 bomb_locations = [[1,1], [2,3]] #[4,1], [2,3], [2,5], [3,6], [3,5]]
 total_bomb_count = 10
+
+test_board_for_not_prob = [['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'],
+ ['E', 'E', 'E', 'E', 'E', '2', ['F', 'B'], '?', '?', 'E'],
+ ['E', 'E', 'E', '1', '1', '3', ['F', 'B'], '2', '?', 'E'],
+ ['E', 'E', 'E', '1', ['F', 'B'], '2', '1', '1', '?', 'E'],
+ ['E', '1', '2', '3', '3', '2', '2', '1', '?', 'E'],
+ ['E',
+  '?',
+  ['?', 'B'],
+  ['?', 'B'],
+  '?',
+  ['?', 'B'],
+  '?',
+  ['?', 'B'],
+  '?',
+  'E'],
+ ['E', '?', '2', '?', ['?', 'B'], '?', '?', '?', ['?', 'B'], 'E'],
+ ['E', '?', '?', '?', '?', '?', '?', '?', '?', 'E'],
+ ['E', '?', ['?', 'B'], '?', '?', '?', '?', '?', '?', 'E'],
+ ['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E']]
 
 game = Minesweeper_with_AI(row_count, col_count, activity_mode, 
                            total_bomb_count=total_bomb_count,
