@@ -54,7 +54,7 @@ from Minesweeper_with_AI import Minesweeper_with_AI
 # Game constants
 row_count = 8
 col_count = 8
-activity_mode = "game"  # game/analysis/parsing
+activity_mode = "parse_board"  # game/analysis/parse_board/parse_window
 bomb_locations = [[1,1], [2,3]] #[4,1], [2,3], [2,5], [3,6], [3,5]]
 total_bomb_count = 10
 
@@ -80,4 +80,5 @@ test_board_for_not_prob = [['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'],
 
 game = Minesweeper_with_AI(row_count, col_count, activity_mode, 
                            total_bomb_count=total_bomb_count,
-                           bomb_locations=bomb_locations)
+                           bomb_locations=bomb_locations,
+                           board=test_board_for_not_prob)

@@ -43,7 +43,11 @@ class Minesweeper:
             for loc in bomb_locations:
                 self.change_tile(loc, "B", show_print=False)
         elif activity_mode == "parse_board":
-            self.board= board
+            self.board = board
+            self.total_bomb_count = 0
+            for tile in self.board:
+                if tile[-1] == "B":
+                    self.total_bomb_count += 1
         elif activity_mode == "parse_window":
             self.Parsing()
         print("super init accessed")

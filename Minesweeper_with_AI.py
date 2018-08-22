@@ -39,14 +39,11 @@ class Minesweeper_with_AI(Minesweeper):
     """
     AI to use strategies to ensure maximum probability of success.
     """
-
-
-
     def __init__(self, row_count=8, col_count=8, activity_mode = "game",
-                 total_bomb_count=10, bomb_locations=[]):
+                 total_bomb_count=10, bomb_locations=[], board=[]):
         
         Minesweeper.__init__(self, row_count, col_count, activity_mode,
-                             total_bomb_count, bomb_locations)
+                             total_bomb_count, bomb_locations, board)
 
         self.make_prob_board()
         
@@ -122,8 +119,6 @@ class Minesweeper_with_AI(Minesweeper):
         
         self.update_prob_board()
         
-            
-        #self.print_prob_board()
         
         
     def make_prob_board(self):
@@ -143,6 +138,7 @@ class Minesweeper_with_AI(Minesweeper):
             self.prob_board[i+1].append(["E", 0, 0.0])
         
         self.prob_board.append(["E"] * (self.col_count + 2))
+
 
 
     def update_prob_board(self):
@@ -171,6 +167,7 @@ class Minesweeper_with_AI(Minesweeper):
                 elif tile == "F":
                     self.prob_board[i][k] = ["F", 0, 1.0]
                         
+
     
     def get_tile_and_prob(self, loc):
         """
@@ -178,39 +175,40 @@ class Minesweeper_with_AI(Minesweeper):
         """
         return self.prob_board[loc[0]][loc[1]]
                         
+
         
     def change_tile_prob(self, loc, probability):
         """
-        Add given probability to the tile
-        Get the average by:
-            the number of probabilities (self.get_tile_prob([1])
-            the probabilities (self.get_tile_prob)
+        Try to alter probability of tile at loc.
+        (Strategy defaults to minimax and cannot be modified.)
         """
-        strategy = "minimax" #"average"
+        # Set strategy.
+        strategy = "minimax" # minimax/average
         
+        # Get old probability of tile.
         old_prob = self.prob_board[loc[0]][loc[1]][2]
         
 #        assert old_avg_prob != 1.0, "You should probably not change a tile with 1.0 bomb prob"
-#        
 #        assert old_avg_prob != 0.0, "You should probably not change a tile with 0.0 bomb prob"
         
         # Increase tile prob count
         self.prob_board[loc[0]][loc[1]][1] += 1
         
+        # Get the number of times tile was assigned a probability.
         assigned_probs_count = self.prob_board[loc[0]][loc[1]][1]
         
-        # Get the second item of the tile, which indicates the number
-        # of probabilities within a single tile.
-        
+        # If strategy is to average probabilities (DEPRECATED)        
         if strategy == "average":
             # Calculate the average probability of a single tile.
             number_of_probs = self.prob_board[loc[0]][loc[1]][1]
             prob_sum = old_prob + probability
     
             new_prob = round(prob_sum / number_of_probs, 2)
-            
+        
+        # If strategy is to minimax (highest probability of bomb gets precedence)
+        # with exemptions such as old tile having been purposefully assigned
+        # 0.0 or 1.0 probability.
         elif strategy == "minimax":
-            #print(probability, old_prob)
             if old_prob == 1.0 or (old_prob == 0.0 and assigned_probs_count > 1):
                 new_prob = round(old_prob, 2)
             elif probability == 1.0 or probability == 0.0:
@@ -220,44 +218,27 @@ class Minesweeper_with_AI(Minesweeper):
             else:
                 new_prob = round(old_prob, 2)
         
+        # Assert that new probability is not absurd, if absurd give AssertionError.
         assert 0.0 <= new_prob <= 1.0, "Probability of tile" + str([loc[0], loc[1]]) + " with " + str(new_prob) + "not possible."
-            
+        
+        # Finally replace with new probability.
         self.prob_board[loc[0]][loc[1]][2] = new_prob
-        
-        #self.update_prob_board()
-            
-    
-        
-#        if len(self.prob_board[loc[0]][loc[1]]) == 1:
-#            self.prob_board[loc[0]][loc[1]] = [self.get_tile([loc[0], loc[1]]), probability]
-#        
-#        else:
-#            self.prob_board[loc[0]][loc[1]] = [self.get_tile([loc[0], loc[1]]), probability]
-            
-        
-    #def get_prob_board(self):
+
         
 
     def print_prob_board(self):
         """
-        Print board as so: [[tile, prob], [tile, prob], ...]
+        Print probability board as so: [[tile, prob], [tile, prob], ...]
         """
         for i in range(1, self.row_count+1):
             for k in range(1, self.row_count+1):
                 text = str(self.get_tile_and_prob([i,k]))
                 while len(text) < 14:
                     text += " "
-                    
                 print(text, end=" ")
             print()
         print()
-#                tile = self.get_tile([i,k])
-#                print(tile, end='')
-#                if len(tile) == 1:
-#                     print("------", end='')
-#                print(" ", end='')
-#            print()
-#        print()
+
 
 
     def change_tiles_prob_around_tile(self, tile_loc, condition, change):
@@ -291,12 +272,18 @@ class Minesweeper_with_AI(Minesweeper):
 #
 #                    self.change_tile_prob([i,k], total_probability)
 
+
     # STRATEGY Functions
 
     def probability_nearby(self):
         """
         Merged pure logic based filling unknown tiles with flags if equal to number
         and if not equal, calculate probability.
+        
+        We list the digit tiles from least unknowns (min 2) to most for the
+        simulation to use, no need to write the same code again.
+        self.simulate() will probably be used only by probability_nearby anyway
+        since it is directly related to their probabilities.
         
         The main problem with this function is that it is not consistent
         in changing the real tile:
@@ -308,22 +295,33 @@ class Minesweeper_with_AI(Minesweeper):
         """
         
         print("Calculating the probability of nearby tiles...")
-
-        self.prob_list = [] # [[loc, prob], [loc, prob], ...]
-        #For every numbered tile:
+        
+        # List of digits with their unknowns.
+        # Format: [ [[digitloc], [unknown1loc], [unknown2loc], ..., [unknownNloc]] ]
+        self.digits_and_their_unknowns = []
+        
+        # For every numbered tile:
         numbered_tiles = self.get_numbered_tiles()
 
         for numbered_tile in numbered_tiles:
-        #   Check all nearby tiles
+            # Check all nearby tiles
             tile_loc = numbered_tile[:2]
             number = numbered_tile[2]
-            around_tile = self.get_tiles_around_tile(tile_loc)
+            around_tile = self.get_tiles_around_tile(tile_loc) 
 
-        #   Go through every unknown tile and count them
+            # Go through every unknown tile and count them.
             unknown_count = 0
+            
+            # Make list of unknowns around number
+            number_unknown_locs = [number]
+            
             for tile in around_tile:
-                if tile[2][0][0] == "?":
+                if tile[2] == "?":
+                    # Add to unknown count
                     unknown_count += 1
+                    
+                    # Add to unknown loc list
+                    unknown_loc.append(tile[:2])
                 # If bomb, then already we have one
                 elif tile[2] == "F":
                     number -= 1
@@ -339,18 +337,17 @@ class Minesweeper_with_AI(Minesweeper):
                 # [?-0.45-0.54-0.67] for example, second or third significant digit.
                 probability = round(number / unknown_count, 3)
                 print("number", number, "unknown", unknown_count, "loc", tile_loc, "nearprob", probability)
+                
+                self.digits_and_their_unknowns.append(number_unknown_locs)
+                
                 for tile in around_tile:
-                    if tile[2][0][0] == "?":
+                    if tile[2] == "?":
                         self.change_tile_prob(tile[:2], probability)
                         #self.change_tile(tile[:2], tile[2][:] + "-" + str(probability))
+                        
+        self.digits_and_their_unknowns.sort(key=len)
 
 
-#    def change_prob_one_zero_tiles(self):
-#        
-#        for i in range(1, self.row_count+1):
-#            for k in range(1, self.row_count+1):
-#                if self.prob_board[i][k][2] == 0.0:
-#                    self.change_tile([i,k], "F")
 
     def probability_not_nearby(self):
         """
@@ -394,10 +391,9 @@ class Minesweeper_with_AI(Minesweeper):
                 
                 # Get locations of nearby unknowns
                 elif tile.isdigit():
-                    for around_tile in self.get_tiles_around_tile([i,k]):
-                        for i_temp, k_temp, tile_type in around_tile:
-                            if tile_type == "?" and [i_temp,k_temp] not in nearby_unknown_locations:
-                                nearby_unknown_locations.append([i_temp,k_temp])
+                    for i_temp, k_temp, tile_type in self.get_tiles_around_tile([i,k]):
+                        if tile_type == "?" and [i_temp,k_temp] not in nearby_unknown_locations:
+                            nearby_unknown_locations.append([i_temp,k_temp])
                     remaining_bomb_count -= 1
 
         if len(not_nearby_tiles) == 0:
@@ -414,6 +410,7 @@ class Minesweeper_with_AI(Minesweeper):
 #            print(tile[:2], probability)
 #            print(self.prob_board)
             
+
     
     def make_simulation_board(self, loc):
         """
@@ -432,6 +429,14 @@ class Minesweeper_with_AI(Minesweeper):
                 # format: [tile, num_of_probs, prob1, prob2, ... probN]
                 tile = self.get_tile([i,k])
                 self.simul_board[i][k] = tile
+                
+                
+    def change_simul_F(self, loc):
+        """
+        Simply change the simulation tile to F (nothing else, since for
+        simulation purposes only trying F is required)
+        """
+        self.simul_board[loc[0]][loc[1]] = "F"
         
         
     
@@ -448,16 +453,47 @@ class Minesweeper_with_AI(Minesweeper):
         Perhaps it would be better if we just try as "assume [loc] is a bomb
         tile. Check if remaining tiles would remain possible." (no more bombs
         left but clearly there is a bomb next to a tile which would not remain)
+        
+        Would it be better to write this within prob_nearby instead?
+        It is, after all, specifically for whether the tiles would contradict
+        if a tile were to happen to be a bomb. Proof by contradiction.
+        
+        Nah, let's make it a seperate function which will be used at the end
+        of probability_nearby().
+        
+        Try making prob board of simulation, if fail, prob becomes 0 or 1.
+        
+        Perhaps we could:
+            Copy current prob board and temporarily save it.
+            For each unknown tile among nearby prob digits:
+                Make change to prob board but do not alter real board.
+                Iterate until nearby unknown tiles at start are as filled as possible.
+                If no error is found:
+                    Check a different unknown_loc to flag instead.
+                If an error is found:
+                    Update original prob board to reflect the tiles flagged via
+                    proof of contradiction. 
+                    Break.
+            If all moves are valid moves by the end, nothing is done.
         """
-        self.make_simulation_board()
-        simulation = Minesweeper()
         
+        #self.make_simulation_board()
+        #simulation = Minesweeper()
         
+        # Copy current prob board and temporarily save it.
+        self.original_prob_board_copy = self.prob_board
         
-        
-        
+        # Get the digit tile with fewest unknown tiles around.
+        # Minimum 2. (if 1, it would be filled anyway, not 0 because nothing left)
+        for number_unknown_locs in self.digits_and_their_unknowns:
+            number = number_unknown_locs[0]
+            unknown_locs = number_unknown_locs[1:]
+            
+            for unknown_loc in unknown_locs:
+                self.change_tile_prob(unknown_loc, 1.0)
 
-
+        
+        
 
 """
 If we cannot find a trivial next tile, we will be using Probability Theory.
