@@ -3,41 +3,20 @@
 """
 Created on Wed Aug  8 00:09:14 2018
 
-@author: denizhan
-"""
-
-# Formalized Strategy
-
+@author: Denizhan Akar
 
 """
-TODO
 
-At the start of every strategy, the prob board is to be updated by the new board.
-
-For every change the AI makes, the prob board is to be updated by the new board.
-
-Or perhaps scrap that. Each time a probability change is made, we can
-update it? But what about before making the probability assessment? That
-won't be affected because the strategy will be utlizing the get_board function
-anyway.
-
-"""
 
 from random import randint
 from Minesweeper import Minesweeper
-
-
-#Get indexes for every numbered tile:
-
-#for index in [range(row_count), range(col_count)]:
-#for i in [col for col,x in enumerate(testlist) if x.isdigit()]:
 
 
 # OPTIMIZE by skipping numbers already known.
 
 class Minesweeper_with_AI(Minesweeper):
     """
-    AI to use strategies to ensure maximum probability of success.
+    AI to use formalized strategies to ensure maximum probability of success.
     """
     def __init__(self, row_count=8, col_count=8, activity_mode = "game",
                  total_bomb_count=10, bomb_locations=[], board=[]):
@@ -53,23 +32,22 @@ class Minesweeper_with_AI(Minesweeper):
         
             
     
-    def ai_next_move(self):
+    def ai_next_move(self, simulation=False):
         """
-        AI makes their next move. 
+        AI makes its next move.
+        Makes changes to the real board according to probability.
+        
         TODO
-        
-        Remove update_prob_board's ability to change 0 and 1.
-        Let ai_next_move handle it.
-        
-        Remove prob_nearby's ability to change 1 prob bombs around tile, only assign 1.0 prob
-        Let ai_next_move handle it.
-        
+        Simulated version of AI to reflect on simulated board?
+        Perhaps make copy of probability board here?
         """
-        self.make_prob_board()
-        self.update_prob_board()
+        
+        if not simulation:
+            self.make_prob_board()
+            self.update_prob_board()
         
         self.probability_nearby()
-        self.probability_not_nearby() #FIXME
+        self.probability_not_nearby()
         
         self.print_prob_board()
         
@@ -95,9 +73,11 @@ class Minesweeper_with_AI(Minesweeper):
                         least_prob_locs.append([i,k])
                         
                     if prob == 1.0:
-                        self.change_tile([i,k], "F")
-                        self.print_prob_board()
-                        self.update_prob_board()
+                        if not simulation:
+                            self.change_tile([i,k], "F")
+                            self.update_prob_board()
+                        else:
+                            self.change_tile_prob([i,k], 1.0, simulation)
         
         if len(least_prob_locs) == 0:
             print("No move to make! - AI")
@@ -114,10 +94,9 @@ class Minesweeper_with_AI(Minesweeper):
                     tile_to_change = [loc[0], loc[1]]
                 else:
                     tile_to_change = [loc[0], loc[1]]
-            
-        self.change_tile(tile_to_change[:2], "O")
         
-        self.update_prob_board()
+        if not simulation:
+            self.change_tile(tile_to_change[:2], "O")
         
         
         
@@ -145,8 +124,6 @@ class Minesweeper_with_AI(Minesweeper):
         """
         Constructs board according to row and col count.
         The main source however is the board itself (we get by get_board)
-        
-        Also change tiles with prob 1.0 and 0.0 .
         
         Format: [[[tile, prob], [tile, prob], ...], 
                  [[tile, prob], [tile, prob], ...]]
@@ -177,11 +154,21 @@ class Minesweeper_with_AI(Minesweeper):
                         
 
         
-    def change_tile_prob(self, loc, probability):
+    def change_tile_prob(self, loc, probability, simulation=False):
         """
         Try to alter probability of tile at loc.
         (Strategy defaults to minimax and cannot be modified.)
-        """
+        
+        If simulation=True, make direct alteration to board.
+        """        
+        if simulation:
+            self.prob_board[loc[0]][loc[1]][1] = 0
+            if probability == 1.0:
+                self.prob_board[loc[0]][loc[1]][2] = "F"
+            if probability == 0.0:
+                self.prob_board[loc[0]][loc[1]][2] = "E"
+            return None
+        
         # Set strategy.
         strategy = "minimax" # minimax/average
         
@@ -247,30 +234,6 @@ class Minesweeper_with_AI(Minesweeper):
         for tile_info in around_tile:
             if tile_info[2] == condition:
                 self.change_tile_prob(tile_info[:2], change)
-                
-
-#    def change_to_average_probability(self):
-#        """
-#        Scan through every tile. If[2][0] first two letters "?-", split by "-",
-#        sum list and divide by len, round to 3
-#        """
-#        for i in range(1, self.row_count+1):
-#            for k in range(1, self.col_count+1):
-#                tile = self.get_tile_and_prob([i,k])[0]
-#                tile_prob = self.get_tile_and_prob([i,k])[1]
-#                if tile == "?":
-#                    prob_values = temp_tile.split("-")[1:]
-#                    total_probability = round(sum([float(x) for x in prob_values])
-#                                                    / len(prob_values), 3)
-#                    if total_probability > 1.0:
-#                        print("Probability of tile", i, k, "not possible.")
-#                        self.print_board()
-#                        raise Exception
-#                    total_probability = str(total_probability)
-#                    while len(total_probability) < 5:
-#                        total_probability += "0"
-#
-#                    self.change_tile_prob([i,k], total_probability)
 
 
     # STRATEGY Functions
@@ -293,7 +256,6 @@ class Minesweeper_with_AI(Minesweeper):
         We need to just give it the prob for all events.
         The actual changing will be done by AI next move.
         """
-        
         print("Calculating the probability of nearby tiles...")
         
         # List of digits with their unknowns.
@@ -319,7 +281,6 @@ class Minesweeper_with_AI(Minesweeper):
                 if tile[2] == "?":
                     # Add to unknown count
                     unknown_count += 1
-                    
                     # Add to unknown loc list
                     unknown_loc.append(tile[:2])
                 # If bomb, then already we have one
@@ -343,7 +304,6 @@ class Minesweeper_with_AI(Minesweeper):
                 for tile in around_tile:
                     if tile[2] == "?":
                         self.change_tile_prob(tile[:2], probability)
-                        #self.change_tile(tile[:2], tile[2][:] + "-" + str(probability))
                         
         self.digits_and_their_unknowns.sort(key=len)
 
@@ -401,14 +361,10 @@ class Minesweeper_with_AI(Minesweeper):
         
         # Calculate probability
         probability = round(remaining_bomb_count / len(not_nearby_tiles), 3)
-        #print(remaining_bomb_count, len(not_nearby_tiles))
-        #print(probability)
 
-        # Add necessary information
+        # Add probability to not-nearby tiles.
         for tile in not_nearby_tiles:
             self.change_tile_prob(tile[:2], probability)
-#            print(tile[:2], probability)
-#            print(self.prob_board)
             
 
     
@@ -463,25 +419,31 @@ class Minesweeper_with_AI(Minesweeper):
         
         Try making prob board of simulation, if fail, prob becomes 0 or 1.
         
-        Perhaps we could:
+        Current TODO:
             Copy current prob board and temporarily save it.
             For each unknown tile among nearby prob digits:
-                Make change to prob board but do not alter real board.
-                Iterate until nearby unknown tiles at start are as filled as possible.
+                Make change to prob board but do not alter real board or update from real board,
+                ensure ai_next_move does not do it either.
+                Iterate next moves until all nearby unknown tiles at start are filled.
                 If no error is found:
-                    Check a different unknown_loc to flag instead.
+                    Check a different unknown_loc to simulate flag instead.
                 If an error is found:
                     Update original prob board to reflect the tiles flagged via
                     proof of contradiction. 
                     Break.
             If all moves are valid moves by the end, nothing is done.
+            
+        THOUGHTS
+        The current problem is making the change without changing the real board
+        in ai_next_move().
+        Perhaps directly alter probability board?
         """
         
         #self.make_simulation_board()
         #simulation = Minesweeper()
         
         # Copy current prob board and temporarily save it.
-        self.original_prob_board_copy = self.prob_board
+        self.original_prob_board_copy = self.prob_board.copy()
         
         # Get the digit tile with fewest unknown tiles around.
         # Minimum 2. (if 1, it would be filled anyway, not 0 because nothing left)
@@ -491,6 +453,8 @@ class Minesweeper_with_AI(Minesweeper):
             
             for unknown_loc in unknown_locs:
                 self.change_tile_prob(unknown_loc, 1.0)
+                self.ai_next_move(simulated=True)
+                
 
         
         

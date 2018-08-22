@@ -9,45 +9,19 @@ DESCRIPTION
 An AI made from the principles which guarantee as much success as possible.
 
 GAME: Minesweeper
-TYPE: Perfect Information
+INFORMATION TYPE: Perfect Information
 
-TODO, by priority
-
-Total conversion to class based system?
-- No need to constantly insert board parameter.
-- Methods work more intricately.
-
-Construct internal data representation of game
+TODO
 Formalize rules of game:
-    ??? Make 2 modes:
-        ??? Play minesweeper on python
+    Make 2 modes:
+        (DONE) Play minesweeper on python
         Parse screen data and play
-Formalize strategy to win game
-    Choose starting locations anywhere other than middle
-    For now choose just 4. If blank space is not found, continue pressing.
-
-    Only consider empty tiles
-
-    If the number of empty tiles around warning number is equal to the
-    warning number minus bomb tiles flagged around it, they are bombs.
-
-    Else: Probability
-
-Use OpenCV to take minesweeper game data
+Use OpenCV to get Minesweeper game data from screen.
 Process data into internal data representation
 
 Use Probability Theory to make wise choice
-
 """
-# Main Executor
-"""
-This is to serve as the main decision flow of the program.
-"""
-
-# If random bombs, change total_bomb_count and activity to game
-# If specific loc bombs, change bomb_loc and activity to anaylsis
-
-# Import own modules
+# Import modules.
 from Minesweeper import Minesweeper
 from Minesweeper_with_AI import Minesweeper_with_AI
 
@@ -55,24 +29,15 @@ from Minesweeper_with_AI import Minesweeper_with_AI
 row_count = 8
 col_count = 8
 activity_mode = "parse_board"  # game/analysis/parse_board/parse_window
-bomb_locations = [[1,1], [2,3]] #[4,1], [2,3], [2,5], [3,6], [3,5]]
-total_bomb_count = 10
+bomb_locations = [[1,1], [2,3]] #[4,1], [2,3], [2,5], [3,6], [3,5]] # If specific loc bombs, change activity to "anaylsis"
+total_bomb_count = 10 # If random bombs, change total_bomb_count and activity to "game"
 
 test_board_for_not_prob = [['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'],
  ['E', 'E', 'E', 'E', 'E', '2', ['F', 'B'], '?', '?', 'E'],
  ['E', 'E', 'E', '1', '1', '3', ['F', 'B'], '2', '?', 'E'],
  ['E', 'E', 'E', '1', ['F', 'B'], '2', '1', '1', '?', 'E'],
  ['E', '1', '2', '3', '3', '2', '2', '1', '?', 'E'],
- ['E',
-  '?',
-  ['?', 'B'],
-  ['?', 'B'],
-  '?',
-  ['?', 'B'],
-  '?',
-  ['?', 'B'],
-  '?',
-  'E'],
+ ['E', '?', ['?', 'B'], ['?', 'B'], '?', ['?', 'B'], '?', ['?', 'B'], '?', 'E'],
  ['E', '?', '2', '?', ['?', 'B'], '?', '?', '?', ['?', 'B'], 'E'],
  ['E', '?', '?', '?', '?', '?', '?', '?', '?', 'E'],
  ['E', '?', ['?', 'B'], '?', '?', '?', '?', '?', '?', 'E'],

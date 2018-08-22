@@ -3,9 +3,7 @@
 """
 Created on Wed Aug  8 00:08:29 2018
 
-@author: denizhan
-
-!!!Why does changing board in print_board affect the global board variable?!!!
+@author: Denizhan Akar
 
 """
 
@@ -14,12 +12,8 @@ Created on Wed Aug  8 00:08:29 2018
 from random import randint
 
 class Minesweeper:
-    """Represents the board"""
-    
-    # Internal Representation of Game
-    
+    """Internal Representation of Game"""    
     board = []
-    
     
     def __init__(self, row_count=8, col_count=8, activity_mode = "game",
                  total_bomb_count=10, bomb_locations=[], board=[]):
@@ -50,7 +44,7 @@ class Minesweeper:
                     self.total_bomb_count += 1
         elif activity_mode == "parse_window":
             self.Parsing()
-        print("super init accessed")
+
         
         
     def make_board(self):
@@ -81,12 +75,7 @@ class Minesweeper:
                 tile = self.get_tile([i,k], analysis)
                 if tile == "F":
                     flagged_tile_count += 1
-                print(tile, end='  ')
-                if len(tile) == 1:
-                    #print(str(i) + "," + str(k), end="")
-#                    print("------", end='')
-                    pass
-                print(" ", end='')
+                print(tile, end='   ')
             print()
         print("Flagged bombs to total bombs:", str(flagged_tile_count) + 
               "/" + str(self.total_bomb_count) + "\n")
@@ -99,8 +88,8 @@ class Minesweeper:
     
     def get_tile(self, tile_loc, analysis=False):
         """
-        Returns tile at tile location
-        Analysis=True reveals 
+        Returns tile at tile locations.
+        Analysis=True reveals bomb locations instead of "?".
         """
         if analysis == True:
             try:
@@ -111,8 +100,7 @@ class Minesweeper:
     
     def get_numbered_tiles(self):
         """
-        Returns all number tiles
-        TODO: Returns all number tiles observed by the player
+        Returns all number tiles observed by the player.
         """
         numbered_tiles = [] # [[tile_row, tile_col, number], ...]
             
@@ -127,7 +115,6 @@ class Minesweeper:
         Returns [[row, col, tile_type], ...]
         """
         around_tile = []
-    #   Shorten variables
         row = tile_loc[0]
         col = tile_loc[1]
         
@@ -144,17 +131,7 @@ class Minesweeper:
     CHANGE Functions.
     Provides allowed core (basic) operative functions on board.
     """
-    
-    def assign_bombs(self, amount=None, tile_loc=None):
-        """
-        Assign bombs to board, random with amount or location specific
-        !!! Not sure if necessary
-        """
-        #if tile_loc is None:
-        #    self.change_random_tiles(amount)
-        pass
-            
-            
+
     def change_tile(self, tile_loc, change_to, show_print=True):
         """
         Function for moving and updating board.
@@ -256,6 +233,11 @@ class Minesweeper:
             self.change_tile(tile_loc, change_to, show_print)
             
     def check_if_win(self):
+        """
+        Check if the game is won.
+        If game is won, sets game_over_state to 1, returns True.
+        Else returns False.
+        """
         for i in range(1, self.row_count+1):
             for k in range(1, self.row_count+1):
                 if self.get_tile([i,k]) == "?":
