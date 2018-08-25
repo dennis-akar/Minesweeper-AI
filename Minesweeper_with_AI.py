@@ -26,10 +26,19 @@ class Minesweeper_with_AI(Minesweeper):
 
         self.make_prob_board()
         
-        while self.game_over_state == 0:
-            print("ai_next_move")
-            self.ai_next_move()
-            self.simulate()
+#        while self.game_over_state == 0:
+#            print("ai_next_move")
+#            self.ai_next_move()
+#            self.simulate()
+        
+        # THE CODE AFTER THIS LINE IS TEMPORARY
+        #self.ai_next_move()
+        self.update_prob_board()
+        self.probability_nearby()
+        self.probability_not_nearby()
+        self.simulate()
+        
+
         
             
     
@@ -98,8 +107,12 @@ class Minesweeper_with_AI(Minesweeper):
         
         if not simulation:
             self.change_tile(tile_to_change[:2], "O")
-        else:
-            self.change_tile_prob([i,k], 0.0, simulation)
+        elif simulation and least_prob == 0.0:
+            # Do we want to open simulated tiles?
+            # We do not want to open tiles where we don't even know if is true.
+            # Unless the probability is 0.0, which theoretically should not be
+            # a bomb. Hence, only make 0.0 prob tiles empty.
+            self.change_tile_prob(tile_to_change[:2], 0.0, simulation)
         
         
     def make_prob_board(self):
@@ -165,9 +178,9 @@ class Minesweeper_with_AI(Minesweeper):
         """        
         if simulation:
             if probability == 1.0:
-                self.prob_board[loc[0]][loc[1]][:2] = ["F", 0, 0.0]
+                self.prob_board[loc[0]][loc[1]] = ["F", 0, 0.0]
             if probability == 0.0:
-                self.prob_board[loc[0]][loc[1]][:2] = ["E", 0, 0.0]
+                self.prob_board[loc[0]][loc[1]] = ["E", 0, 0.0]
             return None
         
         # Set strategy.
@@ -260,7 +273,10 @@ class Minesweeper_with_AI(Minesweeper):
         print("Calculating the probability of nearby tiles...")
         
         # List of digits with their unknowns.
-        # Format: [ [[digitloc], [unknown1loc], [unknown2loc], ..., [unknownNloc]] ]
+        # Format: [ [[digitloc1], [unknown1loc], [unknown2loc], ..., [unknownNloc]], 
+        #           [[digitloc2], [unknown1loc], [unknown2loc], ..., [unknownNloc]]
+        #           ...
+        #           [[digitlocN], [unknown1loc], [unknown2loc], ..., [unknownNloc]] ]
         self.digits_and_their_unknowns = []
         
         # For every numbered tile:
@@ -298,7 +314,8 @@ class Minesweeper_with_AI(Minesweeper):
                 # (Make rep function to add info, but in print only give first lettter)
                 # [?-0.45-0.54-0.67] for example, second or third significant digit.
                 probability = round(number / unknown_count, 3)
-                print("number", number, "unknown", unknown_count, "loc", tile_loc, "nearprob", probability)
+                
+                #print("number", number, "unknown", unknown_count, "loc", tile_loc, "nearprob", probability)
                 
                 self.digits_and_their_unknowns.append(number_unknown_locs)
                 
@@ -439,6 +456,10 @@ class Minesweeper_with_AI(Minesweeper):
         in ai_next_move().
         Perhaps directly alter probability board? Yes, makes sense.
         Then simulated board may not be needed.
+        
+        However, this time we dabble too much with already existing functions,
+        which is causing problems. A recursive solution would have been more
+        elegant.
         """
         
         #self.make_simulation_board()
@@ -453,14 +474,21 @@ class Minesweeper_with_AI(Minesweeper):
             #number = number_unknown_locs[0]
             unknown_locs = number_unknown_locs[1:]
             
-            for unknown_loc in unknown_locs:
+            for unknown_loc in unknown_locs: # temporarily changed so only first element list.
                 try:
                     self.change_tile_prob(unknown_loc, 1.0)
                     # while all locs not different than unknown:
-                    self.ai_next_move(simulation=True)
+                    check_unknown_locs_list = ["?"] * len(unknown_locs)
+                    while True:
+                        self.ai_next_move(simulation=True)
+                        for i, check_unknown_loc in enumerate(unknown_locs):
+                            check_unknown_locs_list[i] = self.get_tile_and_prob(check_unknown_loc)
+                        if "?" not in check_unknown_locs_list:
+                            break
                 except AssertionError:
                     self.prob_board = self.original_prob_board_copy
                     self.change_tile_prob(unknown_loc, 0.0)
+                    break
                 
 
         
