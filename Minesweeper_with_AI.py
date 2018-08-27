@@ -177,10 +177,13 @@ class Minesweeper_with_AI(Minesweeper):
         If simulation=True, make direct alteration to board.
         """        
         if simulation:
+            self.prob_board[loc[0]][loc[1]][1] += 1
             if probability == 1.0:
-                self.prob_board[loc[0]][loc[1]] = ["F", 0, 0.0]
+                self.prob_board[loc[0]][loc[1]][0] = "F"
+                self.prob_board[loc[0]][loc[1]][2] = 1.0
             if probability == 0.0:
-                self.prob_board[loc[0]][loc[1]] = ["E", 0, 0.0]
+                self.prob_board[loc[0]][loc[1]][0] = "E"
+                self.prob_board[loc[0]][loc[1]][2] = 0.0
             return None
         
         # Set strategy.

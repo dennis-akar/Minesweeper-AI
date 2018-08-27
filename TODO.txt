@@ -1,0 +1,6 @@
+PROBLEM:
+Verification of probabilities by their adjacent tiles is not being done.
+
+SOLUTION:
+Write verify function for checking the logic of tiles.
+Scratch that, add in verify to change_tile_prob instead.
