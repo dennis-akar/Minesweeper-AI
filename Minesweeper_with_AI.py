@@ -42,17 +42,16 @@ class Minesweeper_with_AI(Minesweeper):
 
         self.make_prob_board()
 
-        #        while self.game_over_state == 0:
-        #            print("ai_next_move")
-        #            self.ai_next_move()
-        #            self.simulate()
+        while self.game_over_state == 0:
+            print("ai_next_move")
+            self.ai_next_move()
+            # self.simulate()
 
         # THE CODE AFTER THIS LINE IS TEMPORARY
-        # self.ai_next_move()
-        self.update_prob_board()
-        self.probability_nearby()
-        self.probability_not_nearby()
-        self.simulate()
+        # self.update_prob_board()
+        # self.probability_nearby()
+        # self.probability_not_nearby()
+        # self.simulate()
 
     def ai_next_move(self, simulation=False):
         """
@@ -228,11 +227,11 @@ class Minesweeper_with_AI(Minesweeper):
 
         # Assert that new probability is not absurd, if absurd give AssertionError.
         assert 0.0 <= new_prob <= 1.0, (
-            "Probability of tile"
+            "Probability of tile "
             + str([loc[0], loc[1]])
             + " with "
             + str(new_prob)
-            + "not possible."
+            + " not possible."
         )
 
         # Finally replace with new probability.
@@ -287,13 +286,14 @@ class Minesweeper_with_AI(Minesweeper):
         #           [[digitlocN], [unknown1loc], [unknown2loc], ..., [unknownNloc]] ]
         self.digits_and_their_unknowns = []
 
+
         # For every numbered tile:
         numbered_tiles = self.get_numbered_tiles()
 
         for numbered_tile in numbered_tiles:
             # Check all nearby tiles
             tile_loc = numbered_tile[:2]
-            number = numbered_tile[2]
+            number = int(numbered_tile[2])
             around_tile = self.get_tiles_around_tile(tile_loc)
 
             # Go through every unknown tile and count them.
@@ -315,18 +315,21 @@ class Minesweeper_with_AI(Minesweeper):
 
             # if number of unknown tiles == number of tile - flagged tiles:
             #     probablility that they are bombs is 1.0
-            if unknown_count == (int(number) - flagged_tile_count):
+
+            remaining_bombs_around_tile = number - flagged_tile_count
+
+            if unknown_count == remaining_bombs_around_tile:
                 self.change_tiles_prob_around_tile(tile_loc, "?", 1.0)
 
             else:
                 # Get probability, assign to background info of tile
                 # (Make rep function to add info, but in print only give first lettter)
                 # [?-0.45-0.54-0.67] for example, second or third significant digit.
-                probability = round(number / unknown_count, 3)
+                probability = round(remaining_bombs_around_tile / unknown_count, 3)
+                self.change_tiles_prob_around_tile(tile_loc, "?", probability)
 
                 self.digits_and_their_unknowns.append(number_unknown_locs)
 
-                self.change_tiles_prob_around_tile(tile_loc, "?", probability)
 
         self.digits_and_their_unknowns.sort(key=len)
 
@@ -357,7 +360,7 @@ class Minesweeper_with_AI(Minesweeper):
                 # If flagged, substract from remaining bomb count
                 if tile == "F":
                     remaining_bomb_count -= 1
-
+                    
                 # If unknown, check if not-nearby.
                 elif tile == "?":
                     around_tile = self.get_tiles_around_tile([i, k])
@@ -373,11 +376,10 @@ class Minesweeper_with_AI(Minesweeper):
                         )
                         == 0
                     ):
-                        print("appended", [i, k, tile])
                         not_nearby_tiles.append([i, k, tile])
 
-                # HACK If number tile, substract 1 from remaining bomb count.
-                # TODO: Find nearby number tiles, substract by combination possible
+                # !!!HACK If number tile, substract 1 from remaining bomb count.
+                # !!!TODO: Find nearby number tiles, substract by combination possible
                 # which would minimize nearby bomb count.
 
                 # Get locations of nearby unknowns
@@ -402,7 +404,7 @@ class Minesweeper_with_AI(Minesweeper):
 
     def make_simulation_board(self, loc):
         """
-        Creates a new board to make simulations on
+        Creates a new board to make simulations on.
         """
         print("Initilizing simulation board...")
 
@@ -470,7 +472,11 @@ class Minesweeper_with_AI(Minesweeper):
         
         However, this time we dabble too much with already existing functions,
         which is causing problems. A recursive solution would have been more
-        elegant.
+        elegant. Much easier to both provide depth and decide how deep.
+
+        Instead of a full seperate simulation board, how about just adding a new
+        type of acceptable symbol "wF" which stands for "what if F"? Would make much
+        more sense...
         """
 
         # self.make_simulation_board()
@@ -533,3 +539,11 @@ probability.
 If individual tile, choose that.
 If not-nearby or equal, choose random tile which is not near walls.
 """
+
+if __name__ == "__main__":
+    game = Minesweeper_with_AI(
+        8,
+        8,
+        "game",
+        total_bomb_count=10
+    )

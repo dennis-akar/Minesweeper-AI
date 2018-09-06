@@ -119,7 +119,7 @@ class Minesweeper:
         for row_index, row in enumerate(self.board):
             for col_index, item in enumerate(row):
                 if item[0].isdigit():
-                    numbered_tiles.append([row_index, col_index, int(item)])
+                    numbered_tiles.append([row_index, col_index, str(item)])
         return numbered_tiles
 
     def get_tiles_around_tile(self, tile_loc, analysis=False):
