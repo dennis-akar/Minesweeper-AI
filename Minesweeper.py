@@ -67,7 +67,7 @@ class Minesweeper:
             Initialize base board
             """
             self.board.append(["E"])
-            for k in range(self.col_count):
+            for _ in range(self.col_count):
                 self.board[i + 1].append("?")
             self.board[i + 1].append("E")
 
@@ -101,7 +101,7 @@ class Minesweeper:
     def get_tile(self, tile_loc, analysis=False):
         """
         Returns tile at tile locations.
-        Analysis=True reveals bomb locations instead of "?".
+        Analysis=True reveals bomb location if tile is a bomb, instead of "?".
         """
         if analysis == True:
             try:
@@ -194,23 +194,23 @@ class Minesweeper:
                 return None
             # Elif not simply empty:
             elif self.get_tile(tile_loc) != "E":
-                #   Check around that tile
+                # Check around that tile
                 tiles_around_tile = self.get_tiles_around_tile(tile_loc, True)
-                #   If bomb(s) around tile:
+                # If bomb(s) around tile:
                 bomb_count = 0
                 for tile in tiles_around_tile:
                     if tile[2] == "B":
                         bomb_count += 1
                 if bomb_count > 0:
-                    #       Change tile to number of bombs around tile
+                    # Change tile to number of bombs around tile
                     self.board[tile_loc[0]][tile_loc[1]] = str(bomb_count)
                 else:
-                    #       Make empty
+                    # Make empty
                     self.board[tile_loc[0]][tile_loc[1]] = "E"
-                    #       For all tiles around tile:
+                    # For all tiles around tile:
                     for tile in tiles_around_tile:
-                        #           Change tiles around tile to open as well, recursive
-                        #           Should not change "E"
+                        # Change tiles around tile to open as well, recursive
+                        # Should not change "E"
                         self.change_tile(tile[:2], "O", show_print=False)
 
         # If probability being given

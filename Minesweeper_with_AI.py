@@ -137,7 +137,7 @@ class Minesweeper_with_AI(Minesweeper):
             Initialize base prob_board
             """
             self.prob_board.append(["E"])
-            for k in range(self.col_count):
+            for _ in range(self.col_count):
                 self.prob_board[i + 1].append(["?", 0, 0.0])
             self.prob_board[i + 1].append(["E", 0, 0.0])
 
@@ -196,8 +196,8 @@ class Minesweeper_with_AI(Minesweeper):
         # Get old probability of tile.
         old_prob = self.prob_board[loc[0]][loc[1]][2]
 
-        #        assert old_avg_prob != 1.0, "You should probably not change a tile with 1.0 bomb prob"
-        #        assert old_avg_prob != 0.0, "You should probably not change a tile with 0.0 bomb prob"
+        # assert old_avg_prob != 1.0, "You should probably not change a tile with 1.0 bomb prob"
+        # assert old_avg_prob != 0.0, "You should probably not change a tile with 0.0 bomb prob"
 
         # Increase tile prob count
         self.prob_board[loc[0]][loc[1]][1] += 1
@@ -302,6 +302,7 @@ class Minesweeper_with_AI(Minesweeper):
             # Make list of unknowns around number
             number_unknown_locs = [number]
 
+            flagged_tile_count = 0
             for tile in around_tile:
                 if tile[2] == "?":
                     # Add to unknown count
@@ -310,11 +311,11 @@ class Minesweeper_with_AI(Minesweeper):
                     number_unknown_locs.append(tile[:2])
                 # If bomb, then already we have one
                 elif tile[2] == "F":
-                    number -= 1
+                    flagged_tile_count += 1
 
-            #   if number of unknown tiles == number of tile - flagged tiles:
-            #       probablility that they are bombs is 1.0
-            if unknown_count == int(number):
+            # if number of unknown tiles == number of tile - flagged tiles:
+            #     probablility that they are bombs is 1.0
+            if unknown_count == (int(number) - flagged_tile_count):
                 self.change_tiles_prob_around_tile(tile_loc, "?", 1.0)
 
             else:
@@ -323,13 +324,9 @@ class Minesweeper_with_AI(Minesweeper):
                 # [?-0.45-0.54-0.67] for example, second or third significant digit.
                 probability = round(number / unknown_count, 3)
 
-                # print("number", number, "unknown", unknown_count, "loc", tile_loc, "nearprob", probability)
-
                 self.digits_and_their_unknowns.append(number_unknown_locs)
 
-                for tile in around_tile:
-                    if tile[2] == "?":
-                        self.change_tile_prob(tile[:2], probability)
+                self.change_tiles_prob_around_tile(tile_loc, "?", probability)
 
         self.digits_and_their_unknowns.sort(key=len)
 
@@ -371,11 +368,12 @@ class Minesweeper_with_AI(Minesweeper):
                             [
                                 temp_tile[2]
                                 for temp_tile in around_tile
-                                if isinstance(temp_tile[2], int)
+                                if temp_tile[2].isdigit()
                             ]
                         )
                         == 0
                     ):
+                        print("appended", [i, k, tile])
                         not_nearby_tiles.append([i, k, tile])
 
                 # HACK If number tile, substract 1 from remaining bomb count.
