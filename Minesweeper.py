@@ -34,11 +34,15 @@ class Minesweeper:
         self.make_board()
 
         if activity_mode == "game":
+            print("Activity mode is 'game'")
             self.total_bomb_count = total_bomb_count
             self.change_random_tiles(self.total_bomb_count, "B", show_print=False)
             # Return bomb locations
-            print("game")
-            pass
+            self.bomb_locations = []
+            for row in range(1, self.row_count + 1):
+                for col in range(1, self.col_count + 1):
+                    if self.board[row][col][-1] == "B":
+                        self.bomb_locations.append([row, col])
         elif activity_mode == "analysis":
             self.bomb_locations = bomb_locations
             self.total_bomb_count = len(self.bomb_locations)
@@ -47,6 +51,8 @@ class Minesweeper:
         elif activity_mode == "parse_board":
             self.board = board
             self.total_bomb_count = 0
+            # Calculate bomb count by going through every tile
+            # and checking if it is a bomb.
             for tile in self.board:
                 if tile[-1] == "B":
                     self.total_bomb_count += 1
