@@ -50,6 +50,7 @@ class Minesweeper:
                 self.change_tile(loc, "B", show_print=False)
         elif activity_mode == "parse_board":
             self.board = board
+            self.bomb_locations = []
             self.total_bomb_count = 0
             # Calculate bomb count by going through every tile
             # and checking if it is a bomb.

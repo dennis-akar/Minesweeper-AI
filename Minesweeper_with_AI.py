@@ -40,20 +40,25 @@ class Minesweeper_with_AI(Minesweeper):
             board,
         )
 
-        self.make_prob_board()
+        self.search_for_contradictions()
 
         while self.game_over_state == 0:
-            print("ai_next_move")
+            print("Executing AI strategy")
+            self.make_prob_board()
+            self.update_prob_board()
+
+            self.go_through_what_ifs()
+
+            self.probability_nearby()
+
+            self.probability_not_nearby()
+            
+            self.print_prob_board()
+
             self.ai_next_move()
-            # self.simulate()
+            self.search_for_contradictions()
 
-        # THE CODE AFTER THIS LINE IS TEMPORARY
-        # self.update_prob_board()
-        # self.probability_nearby()
-        # self.probability_not_nearby()
-        # self.simulate()
-
-    def ai_next_move(self, simulation=False):
+    def ai_next_move(self):
         """
         AI makes its next move.
         Makes changes to the real board according to probability.
@@ -62,15 +67,6 @@ class Minesweeper_with_AI(Minesweeper):
         Simulated version of AI to reflect on simulated board?
         Perhaps make copy of probability board here?
         """
-
-        if not simulation:
-            self.make_prob_board()
-            self.update_prob_board()
-
-        self.probability_nearby()
-        self.probability_not_nearby()
-
-        self.print_prob_board()
 
         least_prob = 1.0
         least_prob_locs = []
@@ -93,11 +89,8 @@ class Minesweeper_with_AI(Minesweeper):
                         least_prob_locs.append([i, k])
 
                     if prob == 1.0:
-                        if not simulation:
                             self.change_tile([i, k], "F")
                             self.update_prob_board()
-                        else:
-                            self.change_tile_prob([i, k], 1.0, simulation)
 
         if len(least_prob_locs) == 0:
             print("No move to make! - AI")
@@ -115,14 +108,7 @@ class Minesweeper_with_AI(Minesweeper):
                 else:
                     tile_to_change = [loc[0], loc[1]]
 
-        if not simulation:
             self.change_tile(tile_to_change[:2], "O")
-        elif simulation and least_prob == 0.0:
-            # Do we want to open simulated tiles?
-            # We do not want to open tiles where we don't even know if is true.
-            # Unless the probability is 0.0, which theoretically should not be
-            # a bomb. Hence, only make 0.0 prob tiles empty.
-            self.change_tile_prob(tile_to_change[:2], 0.0, simulation)
 
     def make_prob_board(self):
         """
@@ -172,20 +158,17 @@ class Minesweeper_with_AI(Minesweeper):
         """
         return self.prob_board[loc[0]][loc[1]]
 
-    def change_tile_prob(self, loc, probability, simulation=False):
+    def change_tile_prob(self, loc, probability, experimental_flag=False):
         """
         Try to alter probability of tile at loc.
         (Strategy defaults to minimax and cannot be modified.)
-        
-        If simulation=True, make direct alteration to board.
         """
-        if simulation:
-            self.prob_board[loc[0]][loc[1]][1] += 1
+        if experimental_flag:
             if probability == 1.0:
-                self.prob_board[loc[0]][loc[1]][0] = "F"
+                self.prob_board[loc[0]][loc[1]][0] = "wF"
                 self.prob_board[loc[0]][loc[1]][2] = 1.0
             if probability == 0.0:
-                self.prob_board[loc[0]][loc[1]][0] = "E"
+                self.prob_board[loc[0]][loc[1]][0] = "wE"
                 self.prob_board[loc[0]][loc[1]][2] = 0.0
             return None
 
@@ -330,6 +313,22 @@ class Minesweeper_with_AI(Minesweeper):
 
                 self.digits_and_their_unknowns.append(number_unknown_locs)
 
+        # EXPERIMENTAL FOR SIMULATING
+        # for numbered_tile in numbered_tiles:
+        #     # Check all nearby tiles
+        #     tile_loc = numbered_tile[:2]
+        #     number = int(numbered_tile[2])
+        #     around_tile = self.get_tiles_around_tile(tile_loc)
+
+        #     # Go through every unknown tile and count them.
+        #     unknown_count = 0
+
+        #     # Make list of unknowns around number
+        #     number_unknown_locs = [number]
+
+        #     for tile in around_tile:
+        #         if tile == "?":
+        #             self.change_tile_prob(tile_loc, )
 
         self.digits_and_their_unknowns.sort(key=len)
 
@@ -378,10 +377,6 @@ class Minesweeper_with_AI(Minesweeper):
                     ):
                         not_nearby_tiles.append([i, k, tile])
 
-                # !!!HACK If number tile, substract 1 from remaining bomb count.
-                # !!!TODO: Find nearby number tiles, substract by combination possible
-                # which would minimize nearby bomb count.
-
                 # Get locations of nearby unknowns
                 elif tile.isdigit():
                     for i_temp, k_temp, tile_type in self.get_tiles_around_tile([i, k]):
@@ -390,7 +385,13 @@ class Minesweeper_with_AI(Minesweeper):
                             and [i_temp, k_temp] not in nearby_unknown_locations
                         ):
                             nearby_unknown_locations.append([i_temp, k_temp])
-                    remaining_bomb_count -= 1
+
+                    # !!!HACK If number tile, substract 1 from remaining bomb count.
+                    # !!!TODO: Find nearby number tiles, substract by combination possible
+                    # which would minimize nearby bomb count.
+                    # remaining_bomb_count -= 1
+
+                    
 
         if len(not_nearby_tiles) == 0:
             return None
@@ -474,6 +475,7 @@ class Minesweeper_with_AI(Minesweeper):
         which is causing problems. A recursive solution would have been more
         elegant. Much easier to both provide depth and decide how deep.
 
+        TODO
         Instead of a full seperate simulation board, how about just adding a new
         type of acceptable symbol "wF" which stands for "what if F"? Would make much
         more sense...
@@ -499,7 +501,7 @@ class Minesweeper_with_AI(Minesweeper):
                     # while all locs not different than unknown:
                     check_unknown_locs_list = ["?"] * len(unknown_locs)
                     while True:
-                        self.ai_next_move(simulation=True)
+                        self.ai_next_move()
                         for i, check_unknown_loc in enumerate(unknown_locs):
                             check_unknown_locs_list[i] = self.get_tile_and_prob(
                                 check_unknown_loc
@@ -510,6 +512,66 @@ class Minesweeper_with_AI(Minesweeper):
                     self.prob_board = self.original_prob_board_copy
                     self.change_tile_prob(unknown_loc, 0.0)
                     break
+
+
+    def go_through_what_ifs(self):
+        """
+        Go through unknowns of nearby tiles.
+
+        Initialize list of must-be-empty-because-contradiction-if-bomb = []
+        Initialize int of minimum bomb count = 0
+
+        For every nearby tile, choose an inital tile to flag:
+            flag_count = 0
+            For every remaining nearby tile:
+                if tile has to be empty because number == flagged tile count:
+                    Apply "wE"
+                elif tile has to be flagged because unknown_count == remaining bombs around tile:
+                    Apply "wF"
+                    flag_count += 1 
+                if search_for_contradictions == True:
+                    append initial tile to flag to list.
+                    break
+            else:
+                if flag_count < min_bomb_count:
+                    min_bomb_count = flag_count
+                must-be-empty-because-contradiction-if-bomb.append(flag_count)
+
+            For every tile in prob_board:
+                remove all "w" values
+
+        For every loc in must-be-empty-because-contradiction-if-bomb:
+            self.change_tile_prob(loc, 0.0)
+
+
+
+        """
+        must_be_empty = []
+        min_bomb_count = 0
+
+        for number_unknown_locs in self.digits_and_their_unknowns:
+            number = number_unknown_locs[0]
+            unknown_locs = number_unknown_locs[1:]
+
+            for unknown_loc in unknown_locs:
+                initial_flagged_loc = unknown_loc
+                self.change_tile_prob(initial_flagged_loc, 1.0, experimental_flag=True)
+
+                flag_count = 0
+
+                unknown_locs_without_initial = unknown_locs.copy().remove(initial_flagged_loc)
+
+                for next_loc in unknown_locs_without_initial:
+                    # Fill up all nearby tiles as much as possible.
+                    
+                    self.search_for_contradictions()
+                    # If found:
+                       self.change_tile_prob(initial_flagged_loc, 0.0)
+
+
+                    
+
+
 
 
 """
