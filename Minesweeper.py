@@ -41,7 +41,7 @@ class Minesweeper:
             self.bomb_locations = []
             for row in range(1, self.row_count + 1):
                 for col in range(1, self.col_count + 1):
-                    if self.board[row][col][-1] == "B":
+                    if self.get_tile([row, col], analysis=True) == "B":
                         self.bomb_locations.append([row, col])
         elif activity_mode == "analysis":
             self.bomb_locations = bomb_locations
@@ -53,9 +53,11 @@ class Minesweeper:
             self.total_bomb_count = 0
             # Calculate bomb count by going through every tile
             # and checking if it is a bomb.
-            for tile in self.board:
-                if tile[-1] == "B":
-                    self.total_bomb_count += 1
+            for row in range(1, self.row_count + 1):
+                for col in range(1, self.col_count + 1):
+                    if self.get_tile([row, col], analysis=True) == "B":
+                        self.bomb_locations.append([row, col])
+                        self.total_bomb_count += 1
         elif activity_mode == "parse_window":
             Parsing()
 
@@ -115,11 +117,11 @@ class Minesweeper:
         Returns all number tiles observed by the player.
         """
         numbered_tiles = []  # [[tile_row, tile_col, number], ...]
-
-        for row_index, row in enumerate(self.board):
-            for col_index, item in enumerate(row):
-                if item[0].isdigit():
-                    numbered_tiles.append([row_index, col_index, str(item)])
+        
+        for row in range(1, self.row_count + 1):
+            for col in range(1, self.col_count + 1):
+                if self.get_tile([row, col]).isdigit():
+                    numbered_tiles.append([row, col, self.get_tile([row, col])])
         return numbered_tiles
 
     def get_tiles_around_tile(self, tile_loc, analysis=False):
