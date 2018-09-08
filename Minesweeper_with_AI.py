@@ -399,31 +399,6 @@ class Minesweeper_with_AI(Minesweeper):
         for tile in not_nearby_tiles:
             self.change_tile_prob(tile[:2], probability)
 
-    def make_simulation_board(self, loc):
-        """
-        Creates a new board to make simulations on.
-        """
-        print("Initilizing simulation board...")
-
-        # Initialize board list by iterating E's for the
-        # col_count and row_count
-        self.simul_board = [["E"] * (self.col_count + 2)] * (self.row_count + 2)
-
-        # Check every tile on real board.
-        # Replace the simulation tile with the real one.
-        for i in range(1, self.row_count + 1):
-            for k in range(1, self.col_count + 1):
-                # format: [tile, num_of_probs, prob1, prob2, ... probN]
-                tile = self.get_tile([i, k])
-                self.simul_board[i][k] = tile
-
-    def change_simul_F(self, loc):
-        """
-        Simply change the simulation tile to F (nothing else, since for
-        simulation purposes only trying F is required)
-        """
-        self.simul_board[loc[0]][loc[1]] = "F"
-
     def simulate(self):
         """
         Simulate tile change on simulation_board(self,loc)
