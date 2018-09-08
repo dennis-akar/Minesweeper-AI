@@ -7,7 +7,7 @@ Created on Wed Aug  8 00:08:29 2018
 
 """
 
-
+import random
 from random import randint
 
 
@@ -22,6 +22,7 @@ class Minesweeper:
         col_count=8,
         activity_mode="game",
         total_bomb_count=10,
+        seed=randint(0,100),
         bomb_locations=[],
         board=[],
     ):
@@ -35,6 +36,8 @@ class Minesweeper:
 
         if activity_mode == "game":
             print("Activity mode is 'game'")
+            print("Seed for randomization is", seed)
+            random.seed(seed)
             self.total_bomb_count = total_bomb_count
             self.change_random_tiles(self.total_bomb_count, "B", show_print=False)
             # Return bomb locations
@@ -43,6 +46,7 @@ class Minesweeper:
                 for col in range(1, self.col_count + 1):
                     if self.get_tile([row, col], analysis=True) == "B":
                         self.bomb_locations.append([row, col])
+            self.print_board(analysis=True)
         elif activity_mode == "analysis":
             self.bomb_locations = bomb_locations
             self.total_bomb_count = len(self.bomb_locations)
@@ -225,6 +229,7 @@ class Minesweeper:
             self.print_board()
         if self.check_if_win():
             print("Congratulations: You Won!")
+            self.print_board(analysis=True)
 
     def change_random_tiles(
         self, amount, change_to, strategy="any_tile", show_print=True
