@@ -233,12 +233,12 @@ class Minesweeper_with_AI(Minesweeper):
             print()
         print()
 
-    def change_tiles_prob_around_tile(self, tile_loc, condition, change):
+    def change_tiles_prob_around_tile(self, tile_loc, condition, change, experimental_flag=False):
         around_tile = self.get_tiles_around_tile(tile_loc)
 
         for tile_info in around_tile:
             if tile_info[2] == condition:
-                self.change_tile_prob(tile_info[:2], change)
+                self.change_tile_prob(tile_info[:2], change, experimental_flag)
 
     # STRATEGY Functions
 
@@ -267,7 +267,7 @@ class Minesweeper_with_AI(Minesweeper):
         #           [[digitloc2], [unknown1loc], [unknown2loc], ..., [unknownNloc]]
         #           ...
         #           [[digitlocN], [unknown1loc], [unknown2loc], ..., [unknownNloc]] ]
-        self.digits_and_their_unknowns = []
+        self.nearby_unknown_locs = []
 
 
         # For every numbered tile:
@@ -281,17 +281,15 @@ class Minesweeper_with_AI(Minesweeper):
 
             # Go through every unknown tile and count them.
             unknown_count = 0
-
-            # Make list of unknowns around number
-            number_unknown_locs = [number]
-
+            # Go through every flagged tile and count them.
             flagged_tile_count = 0
+
             for tile in around_tile:
                 if tile[2] == "?":
                     # Add to unknown count
                     unknown_count += 1
                     # Add to unknown loc list
-                    number_unknown_locs.append(tile[:2])
+                    self.nearby_unknown_locs.append(tile[:2])
                 # If bomb, then already we have one
                 elif tile[2] == "F":
                     flagged_tile_count += 1
@@ -310,8 +308,6 @@ class Minesweeper_with_AI(Minesweeper):
                 # [?-0.45-0.54-0.67] for example, second or third significant digit.
                 probability = round(remaining_bombs_around_tile / unknown_count, 3)
                 self.change_tiles_prob_around_tile(tile_loc, "?", probability)
-
-                self.digits_and_their_unknowns.append(number_unknown_locs)
 
         # EXPERIMENTAL FOR SIMULATING
         # for numbered_tile in numbered_tiles:
@@ -522,8 +518,8 @@ class Minesweeper_with_AI(Minesweeper):
         Initialize int of minimum bomb count = 0
 
         For every nearby tile, choose an inital tile to flag:
-            flag_count = 0
-            For every remaining nearby tile:
+            flag_count = 1
+            For every remaining nearby tile, by using numbered tiles:
                 if tile has to be empty because number == flagged tile count:
                     Apply "wE"
                 elif tile has to be flagged because unknown_count == remaining bombs around tile:
@@ -544,29 +540,67 @@ class Minesweeper_with_AI(Minesweeper):
             self.change_tile_prob(loc, 0.0)
 
 
-
+        How about calling probability_nearby as a what_if=True parameter?
         """
-        must_be_empty = []
+
+        # Initialize list of must-be-empty-because-contradiction-if-bomb
+        must_be_empty_tiles = []
+        # Initialize int of minimum bomb count
         min_bomb_count = 0
 
-        for number_unknown_locs in self.digits_and_their_unknowns:
-            number = number_unknown_locs[0]
-            unknown_locs = number_unknown_locs[1:]
+        # For every numbered tile:
+        numbered_tiles = self.get_numbered_tiles()
 
-            for unknown_loc in unknown_locs:
-                initial_flagged_loc = unknown_loc
-                self.change_tile_prob(initial_flagged_loc, 1.0, experimental_flag=True)
+        # Copy prob board to return back to.
+        org_prob_board = self.prob_board.copy()
 
-                flag_count = 0
+        for initial_flag in self.nearby_unknown_locs:
+            self.change_tile_prob(initial_flagged_loc, 1.0, experimental_flag=True)
+            unknown_locs_without_initial = self.nearby_unknown_locs.copy().remove(initial_flag)
 
-                unknown_locs_without_initial = unknown_locs.copy().remove(initial_flagged_loc)
+            what_if_flagged_tile_count = 0
 
-                for next_loc in unknown_locs_without_initial:
-                    # Fill up all nearby tiles as much as possible.
-                    
-                    self.search_for_contradictions()
-                    # If found:
-                       self.change_tile_prob(initial_flagged_loc, 0.0)
+            for numbered_tile in numbered_tiles:
+                # Check all nearby tiles
+                tile_loc = numbered_tile[:2]
+                number = int(numbered_tile[2])
+                around_tile = self.get_tiles_around_tile(tile_loc)
+
+                unknown_count = 0
+                flagged_tile_count = 0
+                for tile in around_tile:
+                    if tile[2] == "?":
+                        # Add to unknown count
+                        unknown_count += 1
+                    # If bomb, then already we have one
+                    elif tile[2] == "F":
+                        flagged_tile_count += 1
+                    elif tile[2] == "wF":
+                        what_if_flagged_tile_count += 1
+
+                # if number of unknown tiles == number of tile - flagged tiles:
+                #     probablility that they are bombs is 1.0
+
+                remaining_bombs_around_tile = number - flagged_tile_count
+
+                if unknown_count == remaining_bombs_around_tile:
+                    self.change_tiles_prob_around_tile(tile_loc, "?", 1.0, experimental_flag=True)
+
+                elif remaining_bombs_around_tile == 0:
+                    self.change_tiles_prob_around_tile(tile_loc, "?", 0.0, experimental_flag=True)
+
+                if self.search_for_contradictions():
+                    must_be_empty_tiles.append(initial_flag)
+                    break
+            else:
+                if what_if_flagged_tile_count < min_bomb_count:
+                    min_bomb_count = what_if_flagged_tile_count
+            
+            self.prob_board = org_prob_board.copy()
+
+        for must_be_empty_loc in must_be_empty_tiles:
+            self.change_tile_prob(must_be_empty_loc, 0.0)
+
 
 
                     
