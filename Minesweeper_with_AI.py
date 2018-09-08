@@ -40,7 +40,7 @@ class Minesweeper_with_AI(Minesweeper):
             board,
         )
 
-        self.search_for_contradictions()
+        self.check_for_contradictions()
 
         while self.game_over_state == 0:
             print("Executing AI strategy")
@@ -56,7 +56,7 @@ class Minesweeper_with_AI(Minesweeper):
             self.print_prob_board()
 
             self.ai_next_move()
-            self.search_for_contradictions()
+            assert not self.check_for_contradictions(), "CONTRADICTION DETECTED"
 
     def ai_next_move(self):
         """
@@ -326,8 +326,6 @@ class Minesweeper_with_AI(Minesweeper):
         #         if tile == "?":
         #             self.change_tile_prob(tile_loc, )
 
-        self.digits_and_their_unknowns.sort(key=len)
-
     def probability_not_nearby(self):
         """
         TODO
@@ -460,7 +458,7 @@ class Minesweeper_with_AI(Minesweeper):
 
         # Get the digit tile with fewest unknown tiles around.
         # Minimum 2. (if 1, it would be filled anyway, not 0 because nothing left)
-        for number_unknown_locs in self.digits_and_their_unknowns:
+        for number_unknown_locs in self.nearby_unknown_locs:
             # number = number_unknown_locs[0]
             unknown_locs = number_unknown_locs[1:]
 
@@ -500,7 +498,7 @@ class Minesweeper_with_AI(Minesweeper):
                 elif tile has to be flagged because unknown_count == remaining bombs around tile:
                     Apply "wF"
                     flag_count += 1 
-                if search_for_contradictions == True:
+                if check_for_contradictions == True:
                     append initial tile to flag to list.
                     break
             else:
@@ -530,8 +528,7 @@ class Minesweeper_with_AI(Minesweeper):
         org_prob_board = self.prob_board.copy()
 
         for initial_flag in self.nearby_unknown_locs:
-            self.change_tile_prob(initial_flagged_loc, 1.0, experimental_flag=True)
-            unknown_locs_without_initial = self.nearby_unknown_locs.copy().remove(initial_flag)
+            self.change_tile_prob(initial_flag, 1.0, experimental_flag=True)
 
             what_if_flagged_tile_count = 0
 
@@ -564,7 +561,7 @@ class Minesweeper_with_AI(Minesweeper):
                 elif remaining_bombs_around_tile == 0:
                     self.change_tiles_prob_around_tile(tile_loc, "?", 0.0, experimental_flag=True)
 
-                if self.search_for_contradictions():
+                if self.check_for_contradictions():
                     must_be_empty_tiles.append(initial_flag)
                     break
             else:
@@ -575,6 +572,54 @@ class Minesweeper_with_AI(Minesweeper):
 
         for must_be_empty_loc in must_be_empty_tiles:
             self.change_tile_prob(must_be_empty_loc, 0.0)
+
+
+    def check_for_contradictions(self):
+        """
+        (I'm afraid I am copying this numbered tile code a fair bit.)
+        Goes through every numbered tile, checks for contradictions.
+        Returns True if found, False if not.
+
+        Perhaps later return the loc of the numbered tile that contradicts,
+        but meh.
+        """
+        # For every numbered tile:
+        numbered_tiles = self.get_numbered_tiles()
+
+        for numbered_tile in numbered_tiles:
+            # Check all nearby tiles
+            tile_loc = numbered_tile[:2]
+            number = int(numbered_tile[2])
+            around_tile = self.get_tiles_around_tile(tile_loc)
+
+            # Go through every unknown tile and count them.
+            unknown_count = 0
+            # Go through every flagged tile and count them.
+            flagged_tile_count = 0
+            # Go through every empty tile and count them.
+            empty_tile_count = 0
+
+            for tile in around_tile:
+                if tile[2] == "?":
+                    # Add to unknown count
+                    unknown_count += 1
+                # If bomb, then already we have one
+                elif tile[2] == "F" or tile[2] == "wF":
+                    flagged_tile_count += 1
+                elif tile[2] == "E" or tile[2] == "wE":
+                    empty_tile_count += 1
+
+            # if number of unknown tiles == number of tile - flagged tiles:
+            #     probablility that they are bombs is 1.0
+
+            remaining_bombs_around_tile = number - flagged_tile_count
+
+            if remaining_bombs_around_tile < 0:
+                return True
+            elif unknown_count + flagged_tile_count < number:
+                return True
+
+        return False
 
 
 
