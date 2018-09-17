@@ -29,7 +29,7 @@ from Minesweeper_with_AI import Minesweeper_with_AI
 row_count = 8
 col_count = 8
 activity_mode = "game"  # game/analysis/parse_board/parse_window
-seed = 0
+seed = 1
 bomb_locations = [
     [1, 1],
     [2, 3],

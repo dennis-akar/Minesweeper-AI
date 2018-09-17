@@ -102,7 +102,7 @@ class Minesweeper_with_AI(Minesweeper):
 
         tile_to_change = least_prob_locs[0]
 
-        if len(least_prob_locs) > 1:
+        if len(least_prob_locs) > 0:
             for loc in least_prob_locs:
                 if 1 < loc[0] < self.row_count and 1 < loc[1] < self.col_count:
                     tile_to_change = [loc[0], loc[1]]
@@ -349,7 +349,7 @@ class Minesweeper_with_AI(Minesweeper):
         # For every non-border tile, calculate remaining bomb count and check if
         # not nearby. If not-nearby, add to list.
 
-        nearby_unknown_locations = []
+        nearby_unknown_locations = [] # DEPRECATED
 
         for i in range(1, self.row_count + 1):
             for k in range(1, self.col_count + 1):
@@ -383,7 +383,7 @@ class Minesweeper_with_AI(Minesweeper):
                             tile_type == "?"
                             and [i_temp, k_temp] not in nearby_unknown_locations
                         ):
-                            nearby_unknown_locations.append([i_temp, k_temp])
+                            nearby_unknown_locations.append([i_temp, k_temp]) # DEPRECATED
 
                     # !!!HACK If number tile, substract 1 from remaining bomb count.
                     # !!!TODO: Find nearby number tiles, substract by combination possible
@@ -396,7 +396,9 @@ class Minesweeper_with_AI(Minesweeper):
             return None
 
         # Calculate probability
-        probability = round(remaining_bomb_count / len(not_nearby_tiles), 3)
+        # HACK Bypass the code above for calculating remaining_bomb_count.
+        # Instead, get the minimum bomb count.
+        probability = round((self.total_bomb_count - self.min_bomb_count) / len(not_nearby_tiles), 3)
 
         # Add probability to not-nearby tiles.
         for tile in not_nearby_tiles:
@@ -440,7 +442,7 @@ class Minesweeper_with_AI(Minesweeper):
         # Initialize list of must-be-empty-because-contradiction-if-bomb
         must_be_empty_tiles = []
         # Initialize int of minimum bomb count
-        min_bomb_count = self.total_bomb_count
+        self.min_bomb_count = self.total_bomb_count
 
         # For every numbered tile:
         numbered_tiles = self.get_numbered_tiles()
@@ -497,10 +499,10 @@ class Minesweeper_with_AI(Minesweeper):
                         if tile == "F" or tile == "wF":
                             what_if_flagged_tile_count += 1
 
-                if what_if_flagged_tile_count < min_bomb_count:
+                if what_if_flagged_tile_count < self.min_bomb_count:
                     print("min bomb count CHANGED!", initial_flag, "to", what_if_flagged_tile_count)
                     self.print_prob_board()
-                    min_bomb_count = what_if_flagged_tile_count
+                    self.min_bomb_count = what_if_flagged_tile_count
             # print(initial_flag)
             # self.print_prob_board()
             self.prob_board = deepcopy(org_prob_board)
