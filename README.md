@@ -1,5 +1,26 @@
 # Minesweeper-AI
 
+An "AI" which optimizes its choice of opening or flagging tiles on any board using Probability Theory and Game Theory in order to minimize the opening of tiles which are bombs and maximize the correct opening or flagging of tiles. Decision trees are also simulated to find better pathways to success.
+
+## Purpose
+- To apply and further my knowledge in Probability Theory and Game Theory.
+- To apply OOP concepts from scratch.
+- To have fun.
+
+## Method
+We first program a game interface and framework in which any player, computer or human, could play in. Then we program an AI which utilizes the Minesweeper class object to use as the game, while being able to easily access authorized content to create its own interface and framework of reasoning to assess probabilities and make choices.
+
+Let us have a look:
+
+# The Minesweeper Game
+
+[TO BE UPDATED]
+
+# The Minesweeper AI
+
+
+## Probability Theory
+[TO BE MORE EXPLANATORY]
 If we cannot find a trivial next tile, we will be using Probability Theory.
 
 In the event that no trivial tile can be flagged or opened, we have two methods: 
@@ -25,3 +46,11 @@ We then compare the lowest probability nearby tile with the not-nearby tiles'
 probability.
 If individual tile, choose that.
 If not-nearby or equal, choose random tile which is not near walls.
+
+## Game Theory - Simulation
+
+Maximization of Probability Theory. [More info to come].
+
+## Proof by Contradiction
+
+Utilizing the well-known concept of proof by contradiction to figure out whether the first opening of a simulated what-if chain of events is impossible. If it is, then without a doubt that tile has a bomb, hence it is flagged.
