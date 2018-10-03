@@ -14,6 +14,14 @@ Let us have a look:
 
 # The Minesweeper Game
 
+Three game modes:
+- Game:
+For randomized bomb placement (optionally according to a specific random seed).
+- Analyis:
+For when bomb locations are specified beforehand for analysis and debugging.
+- Parse Board:
+For parsing the actual application of Minesweeper (Ubuntu).
+
 [TO BE UPDATED]
 
 # The Minesweeper AI
