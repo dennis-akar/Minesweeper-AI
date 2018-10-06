@@ -1,6 +1,6 @@
 # Minesweeper-AI
 
-An "AI" which optimizes its choice of opening or flagging tiles on any board using Probability Theory and Game Theory in order to minimize the opening of tiles which are bombs and maximize the correct opening or flagging of tiles. Decision trees are also simulated to find better pathways to success.
+This project involve the creation of the game Minesweeper and an "AI" which does its best to optimize and find the best strategy to win the game. It optimizes its choice of opening or flagging tiles on any board through the use of Probability Theory and Game Theory in order to minimize the opening of tiles which are bombs and maximize the correct opening or flagging of tiles. Decision trees are also simulated to find better pathways to success.
 
 ## Purpose
 - To apply and further my knowledge in Probability Theory and Game Theory.
