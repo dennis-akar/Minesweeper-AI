@@ -349,8 +349,6 @@ class Minesweeper_with_AI(Minesweeper):
         # For every non-border tile, calculate remaining bomb count and check if
         # not nearby. If not-nearby, add to list.
 
-        nearby_unknown_locations = [] # DEPRECATED
-
         for i in range(1, self.row_count + 1):
             for k in range(1, self.col_count + 1):
                 tile = self.get_tile([i, k])
@@ -374,29 +372,13 @@ class Minesweeper_with_AI(Minesweeper):
                         )
                         == 0
                     ):
-                        not_nearby_tiles.append([i, k, tile])
-
-                # Get locations of nearby unknowns
-                elif tile.isdigit():
-                    for i_temp, k_temp, tile_type in self.get_prob_tiles_around_tile([i, k]):
-                        if (
-                            tile_type == "?"
-                            and [i_temp, k_temp] not in nearby_unknown_locations
-                        ):
-                            nearby_unknown_locations.append([i_temp, k_temp]) # DEPRECATED
-
-                    # !!!HACK If number tile, substract 1 from remaining bomb count.
-                    # !!!TODO: Find nearby number tiles, substract by combination possible
-                    # which would minimize nearby bomb count.
-                    # remaining_bomb_count -= 1
-
-                    
+                        not_nearby_tiles.append([i, k, tile])                    
 
         if len(not_nearby_tiles) == 0:
             return None
 
         # Calculate probability
-        # HACK Bypass the code above for calculating remaining_bomb_count.
+        # Temporary HACK: Bypass the code above for calculating remaining_bomb_count.
         # Instead, get the minimum bomb count.
         probability = round((self.total_bomb_count - self.min_bomb_count) / len(not_nearby_tiles), 3)
 
@@ -514,7 +496,6 @@ class Minesweeper_with_AI(Minesweeper):
 
     def check_for_contradictions(self, verbose=False):
         """
-        (I'm afraid I am copying this numbered tile code a fair bit.)
         Goes through every numbered tile, checks for contradictions.
         Returns True if found, False if not.
 

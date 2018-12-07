@@ -29,6 +29,7 @@ For parsing the actual application of Minesweeper (Ubuntu).
 
 ## Probability Theory
 [TO BE MORE EXPLANATORY]
+
 If we cannot find a trivial next tile, we will be using Probability Theory.
 
 In the event that no trivial tile can be flagged or opened, we have two methods: 

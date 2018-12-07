@@ -47,11 +47,13 @@ class Minesweeper:
                     if self.get_tile([row, col], analysis=True) == "B":
                         self.bomb_locations.append([row, col])
             self.print_board(analysis=True)
+        
         elif activity_mode == "analysis":
             self.bomb_locations = bomb_locations
             self.total_bomb_count = len(self.bomb_locations)
             for loc in bomb_locations:
                 self.change_tile(loc, "B", show_print=False)
+        
         elif activity_mode == "parse_board":
             self.board = board
             self.bomb_locations = []
@@ -197,7 +199,6 @@ class Minesweeper:
                 print("Game Over: You Lost!")
                 self.print_board(analysis=True)
                 self.game_over_state = -1
-                # del self.board
                 return None
             # Elif not simply empty:
             elif self.get_tile(tile_loc) != "E":
@@ -220,7 +221,6 @@ class Minesweeper:
                         # Should not change "E"
                         self.change_tile(tile[:2], "O", show_print=False)
 
-        # If probability being given
         else:
             print("ERROR: Command not understood.")
             print("Please enter F, ? or O as a command.")
